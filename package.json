@@ -1,0 +1,66 @@
+{
+  "name": "neat",
+  "description": "Neat is a CLI tool and a collection of the neatest repository templates to improve your repos.",
+  "version": "1.0.0",
+  "author": "Romain Barissat @incorrupt",
+  "bin": {
+    "neat": "./bin/run"
+  },
+  "bugs": "https://github.com/olivr-com/neat/issues",
+  "dependencies": {
+    "@oclif/command": "^1",
+    "@oclif/config": "^1.15.1",
+    "@oclif/plugin-help": "^3",
+    "@types/chalk": "^2.2.0",
+    "@types/inquirer": "^6.5.0",
+    "@types/node": "^14.0.1",
+    "@types/node-fetch": "^2.5.7",
+    "@types/util.promisify": "^1.0.4",
+    "@types/yaml": "^1.9.7",
+    "chalk": "^4.0.0",
+    "inquirer": "^7.1.0",
+    "node-fetch": "^2.6.0",
+    "tslib": "^1",
+    "yaml": "^1.9.2"
+  },
+  "devDependencies": {
+    "@oclif/dev-cli": "^1",
+    "@oclif/test": "^1",
+    "@types/chai": "^4",
+    "@types/mocha": "^5",
+    "chai": "^4",
+    "eslint": "^5.13",
+    "eslint-config-oclif": "^3.1",
+    "eslint-config-oclif-typescript": "^0.1",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-import": "^2.20.2",
+    "mocha": "^5",
+    "nyc": "^14",
+    "ts-node": "^8",
+    "typescript": "^3.3"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/bin",
+    "/lib"
+  ],
+  "homepage": "https://github.com/olivr-com/neat",
+  "keywords": [
+    "oclif"
+  ],
+  "license": "Apache-2.0",
+  "main": "lib/index.js",
+  "oclif": {
+    "bin": "neat"
+  },
+  "repository": "olivr-com/neat",
+  "scripts": {
+    "posttest": "eslint . --ext .ts --config .eslintrc",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
+    "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
+    "version": "oclif-dev readme && git add README.md"
+  },
+  "types": "lib/index.d.ts"
+}
