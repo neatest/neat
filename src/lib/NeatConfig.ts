@@ -12,7 +12,7 @@ export class NeatConfig {
   protected to_replace: Array<string> = [];
 
   constructor(config: string) {
-    const yaml = parse(config);
+    const yaml = parse(config) || {};
 
     // pre_run
     this.preRun = yaml.pre_run ? this.parseArrayStrings(yaml.pre_run) : [];

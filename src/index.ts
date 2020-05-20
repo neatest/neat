@@ -14,14 +14,25 @@ class Neat extends Command {
   static flags = {
     version: flags.version({ char: "v" }),
     help: flags.help({ char: "h" }),
+    only: flags.string({
+      char: "o",
+      description: `Only download remote file names matching the passed regex.
+Note: if the matched files must always be downloaded, use in conjunction with --force`,
+      exclusive: ["except"],
+    }),
+    except: flags.string({
+      char: "e",
+      description: `Any remote file name matching the passed regex will not be downloaded.`,
+      exclusive: ["only"],
+    }),
     force: flags.boolean({
       char: "f",
       description: `Overwrite all local files with their remote counterparts.
-If this flag is not used, Neat will ignore remote file names that exist locally.`,
+If this flag is not used, Neat will ignore remote files that exist locally.`,
     }),
     debug: flags.boolean({
       char: "d",
-      description: `Show each file that was added or skipped`,
+      description: `Display each file that was added / skipped.`,
     }),
   };
 
@@ -51,10 +62,16 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
 
     // Show initialization message
     this.log(`Getting files from ${chalk.cyan(repository)}`);
-    cli.action.start("Loading");
+    //cli.action.start("Loading");
 
     // Initialize repo object
-    const repo = new Repo(repository, args.folder, flags.force);
+    const repo = new Repo(
+      repository,
+      args.folder,
+      flags.force,
+      flags.only,
+      flags.except
+    );
 
     // Get config object
     const neatConfig = await repo.getConfig();

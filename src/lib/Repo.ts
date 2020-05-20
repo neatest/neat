@@ -28,8 +28,16 @@ export class Repo {
   protected tree = {};
 
   protected dir: string;
+  protected only: RegExp | null;
+  protected except: RegExp | null;
 
-  constructor(repository: string, folder = ".", readonly force = false) {
+  constructor(
+    repository: string,
+    folder = ".",
+    readonly force = false,
+    only: string | undefined = undefined,
+    except: string | undefined = undefined
+  ) {
     // https://regexr.com/54m91
     const urlParts = repository.match(/^\/?(([^/]+)\/([^/@]+))\/?(@(.+))?$/i);
     const repo = urlParts && urlParts[1];
@@ -41,6 +49,9 @@ export class Repo {
 
     const dir = folder.replace(/\/$/, "");
     this.dir = /^((\.\/)|\/)/i.test(dir) ? dir : `./${dir}`;
+
+    this.only = only ? new RegExp(only, "i") : null;
+    this.except = except ? new RegExp(except, "i") : null;
   }
 
   // Get repo uri of a neat repo
@@ -127,19 +138,21 @@ export class Repo {
 
         // Create subfolders
         await Promise.all(
-          tree.filter(this.onlyTreesArrayFilter).map((file) => {
-            const path = `${this.dir}/${file.path}`;
-            if (!existsSync(path)) {
-              mkdirSync(path);
-              this.added_dirs.push(path);
-            } else this.skipped_dirs.push(path);
-          })
+          tree
+            .filter((v) => this.onlyTreesArrayFilter(v))
+            .map((file) => {
+              const path = `${this.dir}/${file.path}`;
+              if (!existsSync(path)) {
+                mkdirSync(path);
+                this.added_dirs.push(path);
+              } else this.skipped_dirs.push(path);
+            })
         );
 
         // Download files
         await Promise.all(
           tree
-            .filter(this.onlyFilesArrayFilter)
+            .filter((v) => this.onlyFilesArrayFilter(v))
             .map((file: { path: string; type: string }) => {
               const path = `${this.dir}/${file.path}`;
 
@@ -234,11 +247,25 @@ export class Repo {
       });
   }
 
-  protected onlyTreesArrayFilter(value: { type: string }) {
-    return value.type == "tree";
+  protected onlyTreesArrayFilter(value: {
+    path: string;
+    type: string;
+  }): boolean {
+    if (value.type == "tree") {
+      if (this.only) return this.only.test(value.path);
+      if (this.except) return !this.except.test(value.path);
+    }
+    return false;
   }
 
-  protected onlyFilesArrayFilter(value: { type: string }) {
-    return value.type == "blob";
+  protected onlyFilesArrayFilter(value: {
+    path: string;
+    type: string;
+  }): boolean {
+    if (value.type == "blob") {
+      if (this.only) return this.only.test(value.path);
+      if (this.except) return !this.except.test(value.path);
+    }
+    return false;
   }
 }
