@@ -46,9 +46,8 @@ export class Repo {
 
     this.repository = repo;
     this.branch = (urlParts && urlParts[5]) || "master";
-
-    const dir = folder.replace(/\/$/, "");
-    this.dir = /^((\.\/)|\/)/i.test(dir) ? dir : `./${dir}`;
+    const dir = folder.replace(/((?<!^\.|^\.\.|^)\/$|^\.$)/, "");
+    this.dir = /^\.*\//.test(dir) ? dir : `./${dir}`;
 
     this.only = only ? new RegExp(only, "i") : null;
     this.except = except ? new RegExp(except, "i") : null;
@@ -253,7 +252,8 @@ export class Repo {
   }): boolean {
     if (value.type == "tree") {
       if (this.only) return this.only.test(value.path);
-      if (this.except) return !this.except.test(value.path);
+      else if (this.except) return !this.except.test(value.path);
+      else return true;
     }
     return false;
   }
@@ -264,7 +264,8 @@ export class Repo {
   }): boolean {
     if (value.type == "blob") {
       if (this.only) return this.only.test(value.path);
-      if (this.except) return !this.except.test(value.path);
+      else if (this.except) return !this.except.test(value.path);
+      else return true;
     }
     return false;
   }
