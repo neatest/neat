@@ -139,7 +139,7 @@ export class Repo {
         // Create subfolders
         await Promise.all(
           tree
-            .filter((v) => this.onlyTreesArrayFilter(v))
+            .filter((v) => this.onlyAllowedDirsArrayFilter(v))
             .map((file) => {
               const path = `${this.dir}/${file.path}`;
               if (!existsSync(path)) {
@@ -152,7 +152,7 @@ export class Repo {
         // Download files
         await Promise.all(
           tree
-            .filter((v) => this.onlyFilesArrayFilter(v))
+            .filter((v) => this.onlyAllowedFilesArrayFilter(v))
             .map((file: { path: string; type: string }) => {
               const path = `${this.dir}/${file.path}`;
 
@@ -247,7 +247,7 @@ export class Repo {
       });
   }
 
-  protected onlyTreesArrayFilter(value: {
+  protected onlyAllowedDirsArrayFilter(value: {
     path: string;
     type: string;
   }): boolean {
@@ -258,7 +258,7 @@ export class Repo {
     return false;
   }
 
-  protected onlyFilesArrayFilter(value: {
+  protected onlyAllowedFilesArrayFilter(value: {
     path: string;
     type: string;
   }): boolean {
