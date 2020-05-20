@@ -46,8 +46,10 @@ export class Repo {
 
     this.repository = repo;
     this.branch = (urlParts && urlParts[5]) || "master";
+    // https://regexr.com/54vr1
     const dir = folder.replace(/((?<!^\.|^\.\.|^)\/$|^\.$)/, "");
-    this.dir = /^\.*\//.test(dir) ? dir : `./${dir}`;
+    // https://regexr.com/54vr7
+    this.dir = /^\.*\//.test(dir) ? dir : `./${dir}/`;
 
     this.only = only ? new RegExp(only, "i") : null;
     this.except = except ? new RegExp(except, "i") : null;
@@ -140,7 +142,7 @@ export class Repo {
           tree
             .filter((v) => this.onlyAllowedDirsArrayFilter(v))
             .map((file) => {
-              const path = `${this.dir}/${file.path}`;
+              const path = `${this.dir}${file.path}`;
               if (!existsSync(path)) {
                 mkdirSync(path);
                 this.added_dirs.push(path);
@@ -153,7 +155,7 @@ export class Repo {
           tree
             .filter((v) => this.onlyAllowedFilesArrayFilter(v))
             .map((file: { path: string; type: string }) => {
-              const path = `${this.dir}/${file.path}`;
+              const path = `${this.dir}${file.path}`;
 
               // Do not download the neat config file
               if (file.path == ".neat.yml") return;
