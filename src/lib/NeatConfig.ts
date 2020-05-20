@@ -93,6 +93,7 @@ export class NeatConfig {
 
   // Make sure we get an array of questions
   protected parseArrayQuestions(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     input: Array<any>
   ): Array<NeatConfigQuestionType> {
     return input
@@ -101,6 +102,7 @@ export class NeatConfig {
   }
 
   // Make sure we get a question
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected parseQuestion(input: any): NeatConfigQuestionType | null {
     let question: NeatConfigQuestionType | null = null;
 
@@ -156,6 +158,7 @@ export class NeatConfig {
     return typeof value === "string" && value != "";
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected onlyChoiceArrayFilter(value: any) {
     return (
       typeof value === "object" &&

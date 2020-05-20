@@ -55,6 +55,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
 
     let envVars: { [key: string]: string } = {};
     if (!args.repository) return this._help();
+
     // Get path if input was a neat repo
     const repository = args.repository.includes("/")
       ? args.repository
