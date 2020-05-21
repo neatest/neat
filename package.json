@@ -1,5 +1,5 @@
 {
-  "name": "neat",
+  "name": "@olivr/neat",
   "description": "Neat is a CLI tool and a collection of the neatest repository templates to improve your repos.",
   "version": "1.0.0",
   "author": "Romain Barissat @incorrupt",

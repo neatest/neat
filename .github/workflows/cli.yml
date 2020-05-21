@@ -1,0 +1,23 @@
+name: "Style and documentation"
+env:
+  id: documentation
+
+on: push
+
+jobs:
+  generic:
+    runs-on: ubuntu-latest
+    outputs:
+      pull_request: ${{ steps.cpr.outputs.pull-request-number }}
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12"
+      - run: yarn
+      - run: yarn test
+      - run: ./node_modules/.bin/nyc report --reporter text-lcov > coverage.lcov
+      - uses: codecov/codecov-action@v1
+      #- run: yarn publish
+      #  env:
+      #    NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

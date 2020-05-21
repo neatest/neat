@@ -16,11 +16,11 @@ Neat is a CLI tool and a collection of the neatest repository templates to impro
 # Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g neat
+$ npm install -g @olivr/neat
 $ neat COMMAND
 running command...
 $ neat (-v|--version|version)
-neat/1.0.0 darwin-x64 node-v12.16.3
+@olivr/neat/1.0.0 darwin-x64 node-v12.16.3
 $ neat --help [COMMAND]
 USAGE
   $ neat COMMAND
