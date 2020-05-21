@@ -16,7 +16,7 @@ jobs:
           node-version: "12"
       - run: yarn
       - run: yarn test
-      - run: ./node_modules/.bin/nyc report --reporter text-lcov > coverage.lcov
+      - run: ./node_modules/.bin/nyc report --extension ts --reporter text-lcov > coverage.lcov
       - uses: codecov/codecov-action@v1
       #- run: yarn publish
       #  env:
