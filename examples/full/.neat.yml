@@ -1,0 +1,34 @@
+pre_run: echo 'hello world'
+ask:
+  - id: project_name
+    description: What is your project name?
+    replace: true
+  - id: ci
+    description: What is your preferred CI?
+    default: [Travis, Circle CI, Github Actions]
+    replace: true
+  - id: options
+    description: What options do you want?
+    replace: true
+    default:
+      - "Code Coverage": true
+      - "PR template": false
+      - "Issue templates": true
+  - id: support_url
+    replace: true
+replace_pattern: "{{%s}}"
+replace_filter: \.(md|txt)$
+post_run:
+  - echo $NEAT_ASK_PROJECT_NAME
+  - echo $NEAT_ASK_CI
+  - echo $NEAT_ASK_OPTIONS
+  - echo $NEAT_ASK_SUPPORT_URL
+  - echo $NEAT_ALL_FILES_DIRS | tr " " "\n"
+  - echo $NEAT_ADDED_FILES_DIRS
+  - echo $NEAT_SKIPPED_FILES_DIRS
+  - echo $NEAT_ALL_FILES
+  - echo $NEAT_ADDED_FILES
+  - echo $NEAT_SKIPPED_FILES
+  - echo $NEAT_ALL_DIRS
+  - echo $NEAT_ADDED_DIRS
+  - echo $NEAT_SKIPPED_DIRS

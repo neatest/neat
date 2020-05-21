@@ -1,0 +1,11 @@
+post_run:
+  - echo 'goodbye world'
+  - echo $NEAT_ALL_FILES_DIRS
+  - echo $NEAT_ADDED_FILES_DIRS
+  - echo $NEAT_SKIPPED_FILES_DIRS
+  - echo $NEAT_ALL_FILES
+  - echo $NEAT_ADDED_FILES
+  - echo $NEAT_SKIPPED_FILES
+  - echo $NEAT_ALL_DIRS
+  - echo $NEAT_ADDED_DIRS
+  - echo $NEAT_SKIPPED_DIRS

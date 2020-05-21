@@ -1,0 +1,17 @@
+ask:
+  - id: project_name
+    description: What is your project name?
+  - id: ci
+    description: What is your preferred CI?
+    default: [Travis, Circle CI, Github Actions]
+  - id: options
+    description: What options do you want?
+    default:
+      - "Code Coverage": true
+      - "PR template": false
+      - "Issue templates": true
+  - id: support_url
+post_run:
+  - echo $NEAT_ASK_PROJECT_NAME
+  - echo $NEAT_ASK_CI
+  - echo $NEAT_ASK_OPTIONS

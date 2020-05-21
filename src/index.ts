@@ -132,8 +132,10 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
       envVars.NEAT_ADDED_DIRS = repo.getAddedDirs();
       envVars.NEAT_SKIPPED_DIRS = repo.getSkippedDirs();
 
-      neatConfig.postRun.map((command: string) =>
-        this.execCommand(command, { env: envVars })
+      await Promise.all(
+        neatConfig.postRun.map((command: string) =>
+          this.execCommand(command, { env: envVars })
+        )
       );
     }
   }

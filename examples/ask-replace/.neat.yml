@@ -1,0 +1,17 @@
+ask:
+  - id: project_name
+    description: What is your project name?
+    replace: true
+  - id: ci
+    description: What is your preferred CI?
+    default: [Travis, Circle CI, Github Actions]
+    replace: true
+  - id: options
+    description: What options do you want?
+    replace: true
+    default:
+      - "Code Coverage": true
+      - "PR template": false
+      - "Issue templates": true
+  - id: support_url
+    replace: true
