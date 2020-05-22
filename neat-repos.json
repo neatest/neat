@@ -1,5 +1,6 @@
 {
   "action": "olivr-templates/neat-action",
+  "cli": "olivr-templates/neat-cli",
   "repo": "olivr-templates/neat-repo",
   "terraform": "olivr-templates/neat-terraform"
 }
