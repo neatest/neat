@@ -1,7 +1,7 @@
 {
   "name": "@olivr/neat",
   "description": "Neat is a CLI tool and a collection of the neatest repository templates to improve your repos.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Romain Barissat @incorrupt",
   "bin": {
     "neat": "./bin/run"
@@ -65,8 +65,7 @@
   "scripts": {
     "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
-    "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
-    "version": "oclif-dev readme && git add README.md"
+    "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\""
   },
   "types": "lib/index.d.ts"
 }
