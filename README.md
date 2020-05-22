@@ -48,7 +48,7 @@ Install with:
 
 Essentially what Neat does is download files from a remote GitHub repo to a local folder and eventually ask questions and run pre-defined commands that would be specified in a `.neat.yml` at the root of the remote repo.
 
-There is a collection of neat repos in [neat-repos.json](https://github.com/olivr-com/neat/blob/master/neat-repos.json) (See [contributing](#contributing) if you want to submit yours).
+There is a collection of neat repos in [neat-repos.json](neat-repos.json) (See [contributing](#contributing) if you want to submit yours).
 Although we look at the repo at the time of adding it to the list, we cannot vouch for any changes committed after that.
 
 > ⚠️ As a general rule (not just for Neat), you should never execute a remote file without prior verification because it could have been tampered with malicious code.
@@ -56,7 +56,7 @@ Although we look at the repo at the time of adding it to the list, we cannot vou
 
 ### Use an "official" repo
 
-Use a repo name from the [neatest repos](https://github.com/olivr-com/neat/blob/master/neat-repos.json)
+Use a repo name from the [neatest repos](neat-repos.json)
 
 Download files in the current working directory (without overwriting existing files):
 
@@ -169,7 +169,7 @@ This is non invasive: it will not overwrite your files except for `docs/SECURITY
 
 Each Neat repo can contain a `.neat.yml` configuration file which specifies what to do when someone "neats" your repo.
 
-You can find configuration examples in the [examples](https://github.com/olivr-com/neat/blob/master/examples) folder
+You can find configuration examples in the [examples](examples) folder
 
 ### Pre-run
 
@@ -206,7 +206,7 @@ ask:
     description: What is your project name?
 ```
 
-![input type](https://raw.githubusercontent.com/olivr-com/neat/master/docs/images/input.png "input type")
+![input type](docs/images/input.png "input type")
 
 #### Choice
 
@@ -219,7 +219,7 @@ ask:
     default: [Travis, Circle CI, Github Actions]
 ```
 
-![choice type](https://raw.githubusercontent.com/olivr-com/neat/master/docs/images/choice.png "choice type")
+![choice type](docs/images/choice.png "choice type")
 
 #### Multiple choice
 
@@ -238,7 +238,7 @@ ask:
       - "Issue templates": true
 ```
 
-![multiple choice type](https://raw.githubusercontent.com/olivr-com/neat/master/docs/images/multiple-choice.png "multiple choice type")
+![multiple choice type](docs/images/multiple-choice.png "multiple choice type")
 
 #### Replacements
 
@@ -352,7 +352,7 @@ If you created a neat repo you're proud of, please add it to the official repo l
 
 1. Fork this repo
 
-2. Add your repo to [neat-repos.json](https://github.com/olivr-com/neat/blob/master/neat-repos.json)
+2. Add your repo to [neat-repos.json](neat-repos.json)
 
    - The syntax is `"name": "repo/path"`. As a result, running `neat name` will fetch `repo/path`
    - Insert your repo in alphabetical order
