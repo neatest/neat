@@ -12,17 +12,17 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
   - [Specify a target folder](#specify-a-target-folder)
   - [Options](#options)
   - [Example use case](#example-use-case)
-- [❤️ Creating a neat repo](#-creating-a-neat-repo)
+- [🤘 Creating a neat repo](#-creating-a-neat-repo)
   - [Pre-run](#pre-run)
   - [Ask questions](#ask-questions)
   - [Replacement pattern](#replacement-pattern)
   - [Replacement filter](#replacement-filter)
   - [Post-run](#post-run)
-- [👨‍💻 Contributing](#%E2%80%8D-contributing)
+- [💚 Contributing](#-contributing)
   - [Top five ways to contribute](#top-five-ways-to-contribute)
   - [For maintainers](#for-maintainers)
 - [💡 Todo](#-todo)
-- [🤙 Support](#-support)
+- [💬 Support](#-support)
 - [📜 License](#-license)
 - [⭕ About Olivr](#-about-olivr)
 
@@ -165,7 +165,7 @@ neat oss
 
 This is non invasive: it will not overwrite your files except for `docs/SECURITY.md`
 
-## ❤️ Creating a neat repo
+## 🤘 Creating a neat repo
 
 Each Neat repo can contain a `.neat.yml` configuration file which specifies what to do when someone "neats" your repo.
 
@@ -343,7 +343,7 @@ Examples:
       - "Issue templates": true
   ```
 
-## 👨‍💻 Contributing
+## 💚 Contributing
 
 [![Build](https://github.com/olivr-com/neat/workflows/Build%20&%20Publish%20CLI/badge.svg)](https://github.com/olivr-com/neat/actions?query=workflow%3A%22Build+%26+Publish+CLI%22)
 [![Codecov](https://codecov.io/gh/olivr-com/neat/branch/master/graph/badge.svg)](https://codecov.io/gh/olivr-com/neat)
@@ -413,7 +413,7 @@ yarn version --major
 
 <!-- auto-support -->
 
-## 🤙 Support
+## 💬 Support
 
 Join [Olivr](https://keybase.io/team/olivr) on Keybase 🔐
 
