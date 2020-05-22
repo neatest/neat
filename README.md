@@ -64,6 +64,8 @@ Download files in the current working directory (without overwriting existing fi
 neat repo
 ```
 
+By default the `master` branch is used, if you prefer another branch/tag, you can use the @ notation (Eg. `neat repo@no-emoji`)
+
 ### Use any repo
 
 Download files in the current working directory (without overwriting existing files):
@@ -72,7 +74,7 @@ Download files in the current working directory (without overwriting existing fi
 neat your/repo
 ```
 
-By default the `master` branch is used, if you prefer another branch/tag, you can use the @ notation (Eg. `your/repo@v2.0.0`)
+By default the `master` branch is used, if you prefer another branch/tag, you can use the @ notation (Eg. `neat your/repo@v2.0.0`)
 
 ### Specify a target folder
 
