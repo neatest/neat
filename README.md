@@ -44,6 +44,12 @@ Install with:
   yarn global add @olivr/neat
   ```
 
+- Or use directly with NPX
+
+  ```sh
+  npx @olivr/neat repo
+  ```
+
 ## 🔥 CLI usage
 
 Essentially what Neat does is download files from a remote GitHub repo to a local folder and eventually ask questions and run pre-defined commands that would be specified in a `.neat.yml` at the root of the remote repo.
