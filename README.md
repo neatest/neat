@@ -6,7 +6,7 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [💾 Installation](#-installation)
-- [🔥 Usage](#-usage)
+- [🔥 CLI usage](#-cli-usage)
   - [Use an "official" repo](#use-an-official-repo)
   - [Use any repo](#use-any-repo)
   - [Specify a target folder](#specify-a-target-folder)
@@ -44,7 +44,7 @@ Install with:
   yarn global add @olivr/neat
   ```
 
-## 🔥 Usage
+## 🔥 CLI usage
 
 Essentially what Neat does is download files from a remote GitHub repo to a local folder and eventually ask questions and run pre-defined commands that would be specified in a `.neat.yml` at the root of the remote repo.
 
@@ -364,7 +364,7 @@ If you created a neat repo you're proud of, please add it to the official repo l
 
 ### Top five ways to contribute
 
-⭐ Star this repo (it's quick and goes a long way!)
+⭐ Star this repo: it's quick and goes a long way! [🔝](#top)
 
 🗣️ [Spread the word](docs/CONTRIBUTING.md#spread-the-word)
 
