@@ -54,7 +54,9 @@
   ],
   "homepage": "https://github.com/olivr-com/neat",
   "keywords": [
-    "oclif"
+    "repository",
+    "template",
+    "cli"
   ],
   "license": "Apache-2.0",
   "main": "lib/index.js",

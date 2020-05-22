@@ -57,13 +57,21 @@ export class Repo {
 
   // Get repo uri of a neat repo
   public static async getNeatRepoPath(name: string) {
+    const repoParts = name.match(/(^[\w\d-]+)(@.*)?$/i);
+
+    if (!repoParts || !repoParts[1]) throw "This is no a valid repo name";
+
+    const repoName = repoParts[1];
+    const repoBranch = repoParts[2];
+
     return fetch(this.neat_repos)
       .then((res) => {
         if (res.ok) return res.json();
         else throw res.statusText;
       })
       .then(async (res) => {
-        if (res.hasOwnProperty(name)) return res[name];
+        if (res.hasOwnProperty(repoName))
+          return repoBranch ? res[repoName] + repoBranch : res[repoName];
         else throw `Cannot find this repo in the list ${this.neat_repos}`;
       });
   }
