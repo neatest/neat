@@ -9,7 +9,7 @@ const exec = promisify(require("child_process").exec);
 
 class Neat extends Command {
   static description =
-    "Download files from a remote GitHub repo to a folder and run pre-defined commands on them.";
+    "Download files from a remote GitHub repo to a local folder and eventually ask questions and run pre-defined commands.";
 
   static flags = {
     version: flags.version({ char: "v" }),
