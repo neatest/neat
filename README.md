@@ -56,7 +56,7 @@ Although we look at the repo at the time of adding it to the list, we cannot vou
 
 ### Use an "official" repo
 
-Use a repo name from the [neatest repos](neat-repos.json)
+Use a repo name from the [neat-repos.json](neat-repos.json)
 
 Download files in the current working directory (without overwriting existing files):
 
@@ -152,7 +152,7 @@ Now, let's say you want to:
 - Make sure your repo's security policy is always up to date with your organization's latest security policy
 - Add files from a repo template you created for your favourite framework on your personal GitHub account
 - Add to your repo any new files added in the organization's default repo
-- Add any generic files that you didn't create already from the [neatest oss repo](https://github.com/neatest/oss)
+- Add any generic files that you didn't create already from the [neatest repo](https://github.com/olivr-templates/neat-repo)
 
 You could run the following (or add it in your CI pipeline, package.json, pre-commit hook, etc.)
 
