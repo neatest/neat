@@ -245,6 +245,21 @@ describe("CONFIG", () => {
       });
   });
 
+  describe("ignore", () => {
+    beforeEach(function () {
+      nock("https://raw.githubusercontent.com")
+        .get("/test/test/master/.neat.yml")
+        .replyWithFile(200, "examples/ignore/.neat.yml");
+    });
+
+    test
+      .stdout()
+      .do(() => cmd.run(["repo"]))
+      .it("does not download certain files when ignore is specified", (ctx) => {
+        expect(ctx.stdout).to.contain("Files added: 2");
+      });
+  });
+
   describe("ask", () => {
     test
       .nock("https://raw.githubusercontent.com", (nock) => {

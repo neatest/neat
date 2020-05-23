@@ -4,6 +4,7 @@ import { parse } from "yaml";
 export class NeatConfig {
   public preRun: Array<string>;
   public postRun: Array<string>;
+  public ignore: Array<string>;
   public questions: Array<NeatConfigQuestionType>;
   public replacePattern = "{{%s}}";
   public replaceFilter = /.*/i;
@@ -19,6 +20,9 @@ export class NeatConfig {
 
     // post_run
     this.postRun = yaml.post_run ? this.parseArrayStrings(yaml.post_run) : [];
+
+    // ignore
+    this.ignore = yaml.ignore ? this.parseArrayStrings(yaml.ignore) : [];
 
     // ask
     this.questions =
@@ -37,6 +41,10 @@ export class NeatConfig {
 
   public hasQuestions() {
     return this.questions && this.questions.length > 0 ? true : false;
+  }
+
+  public hasIgnore() {
+    return this.ignore && this.ignore.length > 0 ? true : false;
   }
 
   public hasPreRun() {

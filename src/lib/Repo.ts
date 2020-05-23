@@ -139,7 +139,7 @@ export class Repo {
   }
 
   // Download all files for a repo
-  public async downloadFiles() {
+  public async downloadFiles(ignore: Array<string>) {
     return this.getTree().then(
       async (tree: Array<{ path: string; type: string }>) => {
         // Ensure target folder exists
@@ -148,7 +148,7 @@ export class Repo {
         // Create subfolders
         await Promise.all(
           tree
-            .filter((v) => this.onlyAllowedDirsArrayFilter(v))
+            .filter((v) => this.onlyAllowedDirsArrayFilter(v, ignore))
             .map((file) => {
               const path = `${this.dir}${file.path}`;
               if (!existsSync(path)) {
@@ -161,7 +161,7 @@ export class Repo {
         // Download files
         await Promise.all(
           tree
-            .filter((v) => this.onlyAllowedFilesArrayFilter(v))
+            .filter((v) => this.onlyAllowedFilesArrayFilter(v, ignore))
             .map((file: { path: string; type: string }) => {
               const path = `${this.dir}${file.path}`;
 
@@ -256,23 +256,36 @@ export class Repo {
       });
   }
 
-  protected onlyAllowedDirsArrayFilter(value: {
-    path: string;
-    type: string;
-  }): boolean {
-    if (value.type == "tree") {
-      if (this.only) return this.only.test(value.path);
-      else if (this.except) return !this.except.test(value.path);
-      else return true;
-    }
-    return false;
+  protected onlyAllowedDirsArrayFilter(
+    value: {
+      path: string;
+      type: string;
+    },
+    ignore: Array<string> = []
+  ): boolean {
+    return this.onlyAllowedArrayFilter("tree", value, ignore);
   }
 
-  protected onlyAllowedFilesArrayFilter(value: {
-    path: string;
-    type: string;
-  }): boolean {
-    if (value.type == "blob") {
+  protected onlyAllowedFilesArrayFilter(
+    value: {
+      path: string;
+      type: string;
+    },
+    ignore: Array<string> = []
+  ): boolean {
+    return this.onlyAllowedArrayFilter("blob", value, ignore);
+  }
+
+  protected onlyAllowedArrayFilter(
+    type: string,
+    value: {
+      path: string;
+      type: string;
+    },
+    ignore: Array<string>
+  ): boolean {
+    if (ignore.length > 0 && ignore.includes(value.path)) return false;
+    if (value.type == type) {
       if (this.only) return this.only.test(value.path);
       else if (this.except) return !this.except.test(value.path);
       else return true;

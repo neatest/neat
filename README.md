@@ -73,7 +73,7 @@ neat repo
 By default the `master` branch is used, if you prefer another branch/tag, you can use the @ notation:
 
 ```sh
-neat repo@no-emoji
+neat repo@emoji
 ```
 
 ### Use any repo

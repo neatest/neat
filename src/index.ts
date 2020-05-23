@@ -102,7 +102,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     }
 
     // Download files
-    await repo.downloadFiles().catch(this.error);
+    await repo.downloadFiles(neatConfig.ignore).catch(this.error);
 
     // Replace files
     if (neatConfig.hasReplace())

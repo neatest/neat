@@ -18,6 +18,7 @@ ask:
     replace: true
 replace_pattern: "{{%s}}"
 replace_filter: \.(md|txt)$
+ignore: [README.md]
 post_run:
   - echo $NEAT_ASK_PROJECT_NAME
   - echo $NEAT_ASK_CI
