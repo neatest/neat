@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/camelcase */
 import { expect, test } from "@oclif/test";
-import { ensureFileSync, existsSync, readFileSync, removeSync } from "fs-extra";
+import { existsSync, readFileSync, removeSync } from "fs-extra";
 import nock from "nock";
 const mockInquirer = require("mock-inquirer");
 
@@ -140,18 +140,6 @@ describe("COMMANDS", () => {
       .do(() => cmd.run(["repo"]))
       .it("skips files when force is not set", (ctx) => {
         expect(ctx.stdout).to.contain("Files skipped: 3");
-      });
-  });
-
-  describe("neat --debug", () => {
-    test
-      .do(() => ensureFileSync("./test/test.md"))
-      .stdout()
-      .do(() => cmd.run(["repo", "--debug"]))
-      .it("shows files if debug is set", (ctx) => {
-        expect(ctx.stdout)
-          .to.contain("Files added: 2\n./test/test.")
-          .and.to.contain("Files skipped: 1\n./test/test.md");
       });
   });
 

@@ -30,10 +30,6 @@ Note: if the matched files must always be downloaded, use in conjunction with --
       description: `Overwrite all local files with their remote counterparts.
 If this flag is not used, Neat will ignore remote files that exist locally.`,
     }),
-    debug: flags.boolean({
-      char: "d",
-      description: `Display each file that was added / skipped.`,
-    }),
   };
 
   static args = [
@@ -112,13 +108,11 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
 
     // Log added files to console
     this.log(chalk.green(`Files added: ${repo.added_files.length}`));
-    if (flags.debug && repo.hasAddedFiles())
-      this.log(repo.added_files.join("\n"));
+    if (repo.hasAddedFiles()) this.log(repo.added_files.join("\n"));
 
     // Log skipped files to console
     this.log(chalk.yellow(`Files skipped: ${repo.skipped_files.length}`));
-    if (flags.debug && repo.hasSkippedFiles())
-      this.log(repo.skipped_files.join("\n"));
+    if (repo.hasSkippedFiles()) this.log(repo.skipped_files.join("\n"));
 
     // Run post-run commands
     if (neatConfig.hasPostRun()) {

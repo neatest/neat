@@ -102,14 +102,6 @@ neat repo my-project
 
 ### Options
 
-#### -d, --debug
-
-Display each file that was added / skipped.
-
-```sh
-neat repo --debug
-```
-
 #### -f, --force
 
 Overwrite all local files with their remote counterparts.
