@@ -299,6 +299,16 @@ ask:
 replace_filter: \.(md|txt)$
 ```
 
+### Ignore files
+
+You can specify a list of relative paths to files that should be ignored (aka never downloaded)
+
+You could use it to provide a documentation for your template in a `README.md` but you don't want this to be included when people neat your template:
+
+```sh
+ignore: [README.md]
+```
+
 ### Post-run
 
 Post-run commands are run on the local machine after files are processed.
@@ -414,7 +424,6 @@ yarn version --major
 
 ## 💡 Todo
 
-- [ ] **Specify files to ignore in `.neat.yml`**
 - [ ] **Add --silent flag and specify answers as arguments for CI environments**
 - [ ] Manage file sections within files (inject remote file content or a command output within a local file)
 - [ ] GitHub action running on a schedule to perform automated verification of pre/post run commands in list of neatest repos and add the SHA of the latest commit to `neatest-repos.json`
