@@ -143,6 +143,21 @@ describe("COMMANDS", () => {
       });
   });
 
+  describe("neat --silent", () => {
+    beforeEach(function () {
+      nock("https://raw.githubusercontent.com")
+        .get("/test/test/master/.neat.yml")
+        .replyWithFile(200, "examples/ask/.neat.yml");
+    });
+
+    test
+      .stdout()
+      .do(() => cmd.run(["repo", "--silent"]))
+      .it("runs without asking for user input when silent is set", (ctx) => {
+        expect(ctx.stdout).to.contain("Files added: 3");
+      });
+  });
+
   describe("neat --only", () => {
     test
       .do(() => cmd.run(["repo", "--only"]))

@@ -74,16 +74,32 @@ export class NeatConfig {
     });
   }
 
+  public getAnswersFromVars() {
+    const answers: { [key: string]: string } = {};
+
+    this.questions.forEach((question) => {
+      const envVar = process.env[this.formatQuestionVar(question.name)];
+      answers[question.name] = envVar ? envVar : "";
+    });
+
+    return answers;
+  }
+
   public getEnvFromAnswers(answers: { [key: string]: string | Array<string> }) {
     const env: { [key: string]: string } = {};
 
     Object.keys(answers).map((key: string) => {
       const answer = answers[key];
       const newAnswer = Array.isArray(answer) ? answer.join(", ") : answer;
-      env["NEAT_ASK_" + key.replace(" ", "_").toUpperCase()] = newAnswer;
+      const envName = this.formatQuestionVar(key);
+      env[envName] = newAnswer;
     });
 
     return env;
+  }
+
+  protected formatQuestionVar(question: string) {
+    return "NEAT_ASK_" + question.replace(" ", "_").toUpperCase();
   }
 
   // Make sure we get an array of strings

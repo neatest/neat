@@ -30,6 +30,10 @@ Note: if the matched files must always be downloaded, use in conjunction with --
       description: `Overwrite all local files with their remote counterparts.
 If this flag is not used, Neat will ignore remote files that exist locally.`,
     }),
+    silent: flags.boolean({
+      char: "s",
+      description: `Don't ask for any user input.`,
+    }),
   };
 
   static args = [
@@ -85,16 +89,15 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     // Ask questions
     if (neatConfig.hasQuestions()) {
       cli.action.stop("");
-      envVars = {
-        ...envVars,
-        ...(await inquirer
-          .prompt(neatConfig.questions)
-          .then((answers: Answers) => {
-            neatConfig.addReplacementsFromAnswers(answers);
-            return neatConfig.getEnvFromAnswers(answers);
-          })
-          .catch(this.error)),
-      };
+
+      const answers: Answers = flags.silent
+        ? neatConfig.getAnswersFromVars()
+        : await inquirer.prompt(neatConfig.questions).catch(this.error);
+
+      neatConfig.addReplacementsFromAnswers(answers);
+      const envAskVars = neatConfig.getEnvFromAnswers(answers);
+
+      envVars = { ...envVars, ...envAskVars };
     }
 
     // Download files

@@ -111,6 +111,21 @@ If this flag is not used (default behaviour), Neat will skip remote files that e
 neat repo --force
 ```
 
+#### -s, --silent
+
+Don't ask for any user input.
+If this flag is used Neat will skip any questions asked by a template and will use answers from `NEAT_ASK_*` environment variables
+
+It is best used in CI environments.
+
+```sh
+export NEAT_ASK_PROJECT_NAME="My project"
+export NEAT_ASK_SECURITY_CONTACT="me@example.com"
+export NEAT_ASK_SUPPORT_URL="https://stackoverflow.com"
+
+neat repo --silent
+```
+
 #### -e, --except
 
 Filter out remote files from processing by passing a regular expression.
@@ -424,7 +439,6 @@ yarn version --major
 
 ## 💡 Todo
 
-- [ ] **Add --silent flag and specify answers as arguments for CI environments**
 - [ ] Manage file sections within files (inject remote file content or a command output within a local file)
 - [ ] GitHub action running on a schedule to perform automated verification of pre/post run commands in list of neatest repos and add the SHA of the latest commit to `neatest-repos.json`
 - [ ] When neating a repo, verify which SHA is used and display a warning if it has not been verified yet
