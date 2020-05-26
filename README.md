@@ -5,7 +5,6 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [💾 Installation](#-installation)
 - [🔥 CLI usage](#-cli-usage)
   - [Use a "registered" repo](#use-a-registered-repo)
@@ -265,7 +264,7 @@ ask:
     description: What is your project name?
 ```
 
-![input type](images/input.png "input type")
+![input type](docs/images/input.png "input type")
 
 #### Choice
 
@@ -278,7 +277,7 @@ ask:
     default: [Travis, Circle CI, Github Actions]
 ```
 
-![choice type](images/choice.png "choice type")
+![choice type](docs/images/choice.png "choice type")
 
 #### Multiple choice
 
@@ -297,7 +296,7 @@ ask:
       - "Issue templates": true
 ```
 
-![multiple choice type](images/multiple-choice.png "multiple choice type")
+![multiple choice type](docs/images/multiple-choice.png "multiple choice type")
 
 #### Replacements
 
@@ -527,15 +526,15 @@ If you created a neat repo you're proud of, please add it to the registered repo
 
 ⭐ Star this repo: it's quick and goes a long way! [🔝](#top)
 
-🗣️ [Spread the word](CONTRIBUTING.md#spread-the-word)
+🗣️ [Spread the word](docs/CONTRIBUTING.md#spread-the-word)
 
-🐞 [Report bugs](CONTRIBUTING.md#report-bugs)
+🐞 [Report bugs](docs/CONTRIBUTING.md#report-bugs)
 
-✅ [Resolve issues](CONTRIBUTING.md#resolve-issues)
+✅ [Resolve issues](docs/CONTRIBUTING.md#resolve-issues)
 
-📝 [Improve the documentation](CONTRIBUTING.md#improve-the-documentation)
+📝 [Improve the documentation](docs/CONTRIBUTING.md#improve-the-documentation)
 
-Please see the [docs/CONTRIBUTING.md](CONTRIBUTING.md) for more information.
+Please see the [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for more information.
 
 ### Project specifics
 
