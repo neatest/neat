@@ -9,38 +9,9 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - name: Generate table of content
+      - name: Generate and commit table of content
         uses: technote-space/toc-generator@v2
         with:
           TARGET_PATHS: docs/README.md
           TOC_TITLE: ""
           MAX_HEADER_LEVEL: 3
-
-      - name: Markdown Lint
-        uses: avto-dev/markdown-lint@v1
-        with:
-          args: "**/*.md"
-          fix: true
-
-      - name: Create Pull Request
-        id: cpr
-        uses: peter-evans/create-pull-request@v2
-        with:
-          branch: auto-documentation-${{github.ref}}
-          commit-message: Update documentation
-          title: Changes by Documentation action workflow
-          labels: automerge, documentation
-
-      - name: Merge Pull Request
-        uses: actions/github-script@master
-        if: ${{ steps.cpr.outputs.pull-request-number > 0 }}
-        env:
-          pr_number: ${{ steps.cpr.outputs.pull-request-number }}
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.pulls.merge({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: process.env['pr_number']
-            })
