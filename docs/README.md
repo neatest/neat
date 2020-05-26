@@ -2,11 +2,13 @@
 
 Neat is a CLI tool and a collection of the neatest repository templates to boost your repos.
 
-<!-- START doctoc -->
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 
 - [💾 Installation](#-installation)
 - [🔥 CLI usage](#-cli-usage)
-  - [Use an "official" repo](#use-an-official-repo)
+  - [Use a "registered" repo](#use-a-registered-repo)
   - [Use any repo](#use-any-repo)
   - [Specify a target folder](#specify-a-target-folder)
   - [Options](#options)
@@ -16,16 +18,20 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
   - [Ask questions](#ask-questions)
   - [Replacement pattern](#replacement-pattern)
   - [Replacement filter](#replacement-filter)
+  - [Inject files](#inject-files)
+  - [Ignore files](#ignore-files)
   - [Post-run](#post-run)
 - [💚 Contributing](#-contributing)
+  - [Add your repo to the registered repo list](#add-your-repo-to-the-registered-repo-list)
   - [Top five ways to contribute](#top-five-ways-to-contribute)
+  - [Project specifics](#project-specifics)
   - [For maintainers](#for-maintainers)
 - [💡 Todo](#-todo)
 - [💬 Support](#-support)
 - [📜 License](#-license)
 - [⭕ About Olivr](#-about-olivr)
 
-<!-- END doctoc -->
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## 💾 Installation
 
