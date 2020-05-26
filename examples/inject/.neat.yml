@@ -1,0 +1,8 @@
+inject:
+  - id: support
+    file: test/test.md
+    target: test/test.html
+    pattern: "<!-- auto-support -->"
+  - id: hello
+    command: echo "hello world"
+    target: [test/test.txt]

@@ -35,19 +35,19 @@ Install with:
 - NPM
 
   ```sh
-  npm install -g @olivr/neat
+  npm install -g neat
   ```
 
 - Yarn
 
   ```sh
-  yarn global add @olivr/neat
+  yarn global add neat
   ```
 
 - Or use directly with NPX
 
   ```sh
-  npx @olivr/neat repo
+  npx neat repo
   ```
 
 ## 🔥 CLI usage
@@ -60,7 +60,7 @@ Although we look at the repo at the time of adding it to the list, we cannot vou
 > ⚠️ As a general rule (not just for Neat), you should never execute a remote file without prior verification because it could have been tampered with malicious code.
 > As such, it is always recommended to execute remote files in a controlled environment such as a remote CI environment or a local docker container to contain eventual damage.
 
-### Use an "official" repo
+### Use a "registered" repo
 
 Use a repo name from the [neat-repos.json](neat-repos.json)
 
@@ -102,13 +102,42 @@ neat repo my-project
 
 ### Options
 
+#### --force-download
+
+The default behaviour is to skip processing remote files that already exist locally.
+
+Using this flag will overwrite all local files with their remote counterparts.
+
+```sh
+neat repo --force-download
+```
+
+#### --force-inject
+
+The default behaviour is to skip injecting local files that have already been injected (ie. if the target file contains two occurences of the injection pattern)
+
+Using this flag will force re-injecting those files.
+
+```sh
+neat repo --force-inject
+```
+
 #### -f, --force
 
-Overwrite all local files with their remote counterparts.
-If this flag is not used (default behaviour), Neat will skip remote files that exist locally.
+If you wish to use both `--force-download` and `--force-inject`, you can use the alias `--force`or `-f`
+
+> **Note on future versions of Neat**: As new features will be added to Neat, using `--force` will always be the same as combining all the `--force-*` flags. Keep that in mind if you use Neat in automation or if you're a heavy neat user.
+
+So, in the current version, running this:
 
 ```sh
 neat repo --force
+```
+
+Is the same as running this:
+
+```sh
+neat repo --force-download --force-inject
 ```
 
 #### -s, --silent
@@ -200,7 +229,7 @@ You can find configuration examples in the [examples](examples) folder
 
 Pre-run commands are run on the local machine before any files are processed.
 
-> Those commands should be cross-OS compatible or tell in your README which environment should be used
+If you plan for other people to neat your repo, you should make sure these commands can run on any OS, or tell otherwise in your README.
 
 ### Ask questions
 
@@ -314,6 +343,98 @@ ask:
 replace_filter: \.(md|txt)$
 ```
 
+### Inject files
+
+You can specify a list of files or command outputs to be "injected" into specific files.
+
+This is useful to maintain a text file that contains both sections pertaining to your repo as well as sections found in other files or commands.
+
+You can specify either a `file` or a `command` as the source.
+
+```sh
+inject:
+  - id: hello
+    command: echo "hello world"
+    target: README.md
+  - id: support
+    file: readme/support.md
+    target: docs/CONTRIBUTING.md
+```
+
+If the target file does not exist, it will be created.
+
+If you use a command as the source and plan for other people to neat your repo, you should make sure they can run on any OS, or tell otherwise in your README.
+
+#### Injection pattern
+
+The default pattern is `<!-- id -->` with `id` being the value of the corresponding id (like `<!-- hello -->` in the example above)
+
+Neat will find either:
+
+- Two occurences of the pattern with or without any text in between
+- One occurence of the pattern
+
+If it cannot find this pattern in the target file, Neat will add it at the bottom of the file.
+
+You can customize the replacement pattern:
+
+```sh
+inject:
+  - id: hello
+    command: echo "hello world"
+    target: README.md
+    pattern: "<!-- hello-docs -->"
+```
+
+#### Several targets
+
+This example will find the pattern `<!-- hello -->` and replace it with `hello world` in both targets
+
+```sh
+inject:
+  - id: hello
+    command: echo "hello world"
+    target: [docs/CONTRIBUTING.md, README.md]
+```
+
+#### Inject used in conjuction with ignore
+
+For example, if your neat repo is using a README.md to describe what it can do and how to use it but you don't want this README.md to be downloaded when someone neats it, [you can ignore it](#ignore-files).
+
+```sh
+ignore: [README.md]
+```
+
+- Using `ignore` in conjunction with `inject`:
+
+  ```sh
+  ignore: [README.md]
+  inject:
+    - id: hello
+      command: echo "hello world"
+      target: README.md
+  ```
+
+  As expected, `README.md` will not be downloaded. However:
+
+  - If Neat is run in a folder that doesn't contain a `README.md` already, it will create it and inject the `hello` section.
+  - If Neat is run in a folder that already contains a `README.md`, it will either replace or append the pattern (as described in [Injection pattern](#injection-pattern))
+
+- If the source file for the injection is ignored:
+
+  ```sh
+  ignore: [readme/support.md]
+  inject:
+    - id: support
+      file: readme/support.md
+      target: README.md
+  ```
+
+  As expected, `readme/support.md` will not be downloaded. However:
+
+  - If Neat is run in a folder that doesn't contain a `readme/support.md` already, it will inject into `README.md` the content of `readme/support.md` that is found in your neat repo.
+  - If Neat is run in a folder that already contains a `readme/support.md`, it will use that content as the content to inject into `README.md`
+
 ### Ignore files
 
 You can specify a list of relative paths to files that should be ignored (aka never downloaded)
@@ -328,7 +449,7 @@ ignore: [README.md]
 
 Post-run commands are run on the local machine after files are processed.
 
-If you plan for other people to use those commands, you should make sure they can run on any OS, otherwise you should tell in your README which environment should be used.
+If you plan for other people to neat your repo, you should make sure these commands can run on any OS, or tell otherwise in your README.
 
 #### Files environment variables
 
@@ -383,7 +504,9 @@ Examples:
 [![Build](https://github.com/olivr-com/neat/workflows/Build%20&%20Publish%20CLI/badge.svg)](https://github.com/olivr-com/neat/actions?query=workflow%3A%22Build+%26+Publish+CLI%22)
 [![Codecov](https://codecov.io/gh/olivr-com/neat/branch/master/graph/badge.svg)](https://codecov.io/gh/olivr-com/neat)
 
-If you created a neat repo you're proud of, please add it to the official repo list:
+### Add your repo to the registered repo list
+
+If you created a neat repo you're proud of, please add it to the registered repos list:
 
 1. Fork this repo
 
@@ -408,6 +531,32 @@ If you created a neat repo you're proud of, please add it to the official repo l
 📝 [Improve the documentation](docs/CONTRIBUTING.md#improve-the-documentation)
 
 Please see the [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for more information.
+
+### Project specifics
+
+Install dependencies:
+
+```sh
+yarn install
+```
+
+Run tests:
+
+```sh
+yarn test
+```
+
+Run neat:
+
+```sh
+./bin/run
+```
+
+Use your code as the neat version you use on your system:
+
+```sh
+yarn link
+```
 
 ### For maintainers
 
@@ -439,7 +588,7 @@ yarn version --major
 
 ## 💡 Todo
 
-- [ ] Manage file sections within files (inject remote file content or a command output within a local file)
+- [ ] Overwrite remote config with local config (Add a .neat.yml locally with for example `remote: [repo: [inject: [...]]]` and it will ignore any injections from the remote)
 - [ ] GitHub action running on a schedule to perform automated verification of pre/post run commands in list of neatest repos and add the SHA of the latest commit to `neatest-repos.json`
 - [ ] When neating a repo, verify which SHA is used and display a warning if it has not been verified yet
 - [ ] Provide a Docker image with Neat already installed to easily run it in a containerized environment

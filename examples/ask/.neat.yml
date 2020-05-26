@@ -1,6 +1,7 @@
 ask:
   - id: project_name
     description: What is your project name?
+    default: my project
   - id: ci
     description: What is your preferred CI?
     default: [Travis, Circle CI, Github Actions]

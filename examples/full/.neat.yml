@@ -19,6 +19,14 @@ ask:
 replace_pattern: "{{%s}}"
 replace_filter: \.(md|txt)$
 ignore: [README.md]
+inject:
+  - id: support
+    file: test/test.md
+    target: test.html
+    pattern: "<!-- auto-support -->"
+  - id: hello
+    command: echo "hello world"
+    target: [test.txt]
 post_run:
   - echo $NEAT_ASK_PROJECT_NAME
   - echo $NEAT_ASK_CI
