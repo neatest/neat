@@ -2,6 +2,7 @@ import { Command, flags } from "@oclif/command";
 import chalk from "chalk";
 import { exec } from "child_process";
 import cli from "cli-ux";
+import { existsSync, mkdirSync } from "fs-extra";
 import inquirer from "inquirer";
 import { ChunkLogType, LocalFolder } from "./lib/LocalFolder";
 import { NeatConfig } from "./lib/NeatConfig";
@@ -204,6 +205,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
 
   // Function to execute pre/post run commands
   async execCommand(command: string, folder: string, env = {}) {
+    if (!existsSync(folder)) mkdirSync(folder);
     return new Promise((resolve) => {
       cli.action.start(command);
       const output = exec(
