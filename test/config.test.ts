@@ -4,9 +4,12 @@ import { expect, test } from "@oclif/test";
 import { cli } from "cli-ux";
 import { existsSync, removeSync } from "fs-extra";
 import nock from "nock";
+import { stub } from "sinon";
 import { expectFilesContentToMatch, testContent } from "./testHelpers";
 
 const mockInquirer = require("mock-inquirer");
+
+stub(cli.action, "start");
 
 import cmd = require("../src");
 
@@ -53,6 +56,7 @@ describe("CONFIG", () => {
           .get("/test/test/master/.neat.yml")
           .replyWithFile(200, "examples/pre-run/.neat.yml");
       })
+      .stderr()
       .stdout()
       .do(() => cmd.run(["test"]))
       .it("runs when pre-run commands are specified", (ctx) => {
@@ -72,6 +76,7 @@ describe("CONFIG", () => {
           .get("/test/test/master/.neat.yml")
           .replyWithFile(200, "examples/post-run/.neat.yml");
       })
+      .stderr()
       .stdout()
       .do(() => cmd.run(["test"]))
       .it("runs when post-run commands are specified", (ctx) => {
@@ -93,10 +98,13 @@ describe("CONFIG", () => {
       })
       .stdout()
       .do(() => cmd.run(["test"]))
-      .it("does not download certain files when ignore is specified", (ctx) => {
-        expect(ctx.stdout).to.contain("Files added: 2");
-        expectFilesContentToMatch("./", ["test/test.html", "test/test.txt"]);
-      });
+      .it(
+        "does not download certain file(s) when ignore is specified",
+        (ctx) => {
+          expect(ctx.stdout).to.contain("2 file(s) added");
+          expectFilesContentToMatch("./", ["test/test.html", "test/test.txt"]);
+        }
+      );
 
     test
       .stub(cli, "anykey", () => async () => Promise.resolve())
@@ -119,9 +127,9 @@ describe("CONFIG", () => {
       .stdout()
       .do(() => cmd.run(["test@ignore"]))
       .it(
-        "does not download certain files when they are in an ignored folder",
+        "does not download certain file(s) when they are in an ignored folder",
         (ctx) => {
-          expect(ctx.stdout).to.contain("Files added: 3");
+          expect(ctx.stdout).to.contain("3 file(s) added");
         }
       );
   });
@@ -138,12 +146,13 @@ describe("CONFIG", () => {
           .replyWithFile(200, "examples/ask/.neat.yml");
       })
       .stdout()
+      .stderr()
       .do(() => cmd.run(["test"]))
       .it("runs when questions are specified", (ctx) => {
         expect(ctx.stdout)
-          .to.contain("echo $NEAT_ASK_PROJECT_NAME\nhello world")
-          .and.to.contain("echo $NEAT_ASK_CI\nTravis")
-          .and.to.contain("echo $NEAT_ASK_OPTIONS\nCode Coverage, PR template");
+          .to.contain("hello world")
+          .and.to.contain("Travis")
+          .and.to.contain("Code Coverage, PR template");
         expectFilesContentToMatch();
       });
 
@@ -264,8 +273,8 @@ describe("CONFIG", () => {
       .do(() => cmd.run(["test"]))
       .it("injects when no pattern is found", (ctx) => {
         expect(ctx.stdout)
-          .to.contain("Chunks injected: 2")
-          .and.to.contain("Files added: 3");
+          .to.contain("2 chunk(s) injected")
+          .and.to.contain("3 file(s) added");
 
         const htmlContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}\n\n<!-- auto-support -->`;
         const txtContent = `${testContent}\n\n<!-- hello -->\n\nhello world\n\n<!-- hello -->`;
@@ -290,8 +299,8 @@ describe("CONFIG", () => {
       .do(() => cmd.run(["test"]))
       .it("injects when a single pattern is found", (ctx) => {
         expect(ctx.stdout)
-          .to.contain("Chunks injected: 1")
-          .and.to.contain("Files added: 3");
+          .to.contain("1 chunk(s) injected")
+          .and.to.contain("3 file(s) added");
 
         const htmlContent = testContent.replace(
           "<!-- project_name -->",
@@ -315,9 +324,8 @@ describe("CONFIG", () => {
       .do(() => cmd.run(["test"]))
       .it("doesn't inject when a double pattern is found", (ctx) => {
         expect(ctx.stdout)
-          .to.contain("Chunks injected: 0")
-          .and.to.contain("Chunks skipped: 2")
-          .and.to.contain("Files skipped: 3");
+          .to.contain("2 chunk(s) skipped")
+          .and.to.contain("3 file(s) skipped");
 
         const htmlContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}\n\n<!-- auto-support -->`;
         const txtContent = `${testContent}\n\n<!-- hello -->\n\nhello world\n\n<!-- hello -->`;
@@ -347,9 +355,8 @@ describe("CONFIG", () => {
           "injects when double pattern exists already and force is set",
           (ctx) => {
             expect(ctx.stdout)
-              .to.contain("Chunks injected: 1")
-              .and.to.contain("Chunks skipped: 0")
-              .and.to.contain("Files added: 3");
+              .to.contain("1 chunk(s) injected")
+              .and.to.contain("3 file(s) added");
 
             const htmlContent = testContent.replace(
               "<!-- project_name -->",
@@ -376,9 +383,8 @@ describe("CONFIG", () => {
           "injects when double pattern exists already and force-inject is set",
           (ctx) => {
             expect(ctx.stdout)
-              .to.contain("Chunks injected: 2")
-              .and.to.contain("Chunks skipped: 0")
-              .and.to.contain("Files added: 0");
+              .to.contain("2 chunk(s) injected")
+              .and.to.contain("0 file(s) added");
 
             const htmlContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}\n\n<!-- auto-support -->`;
             const txtContent = `${testContent}\n\n<!-- hello -->\n\nhello world\n\n<!-- hello -->`;
@@ -406,10 +412,10 @@ describe("CONFIG", () => {
       })
       .stdout()
       .do(() => cmd.run(["test"]))
-      .it("injects when source file is in the ignored files list", (ctx) => {
+      .it("injects when source file is in the ignored file(s) list", (ctx) => {
         expect(ctx.stdout)
-          .to.contain("Chunks injected: 1")
-          .and.to.contain("Files added: 2");
+          .to.contain("1 chunk(s) injected")
+          .and.to.contain("2 file(s) added");
 
         const htmlContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}\n\n<!-- auto-support -->`;
         expectFilesContentToMatch("./", ["test/test.txt"], testContent);
@@ -436,8 +442,8 @@ describe("CONFIG", () => {
       .do(() => cmd.run(["test"]))
       .it("does not inject wrongly configured injections", (ctx) => {
         expect(ctx.stdout)
-          .to.contain("Chunks injected: 1")
-          .and.to.contain("Files added: 3");
+          .to.contain("1 chunk(s) injected")
+          .and.to.contain("3 file(s) added");
 
         const htmlContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}\n\n<!-- auto-support -->`;
         expectFilesContentToMatch("./", ["test/test.md", "test/test.txt"]);

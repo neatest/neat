@@ -1,4 +1,4 @@
-pre_run: echo 'hello world'
+pre-run: echo 'hello world'
 ask:
   - id: project_name
     description: What is your project name?
@@ -27,7 +27,7 @@ inject:
   - id: hello
     command: echo "hello world"
     target: [test.txt]
-post_run:
+post-run:
   - echo $NEAT_ASK_PROJECT_NAME
   - echo $NEAT_ASK_CI
   - echo $NEAT_ASK_OPTIONS

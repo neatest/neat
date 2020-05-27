@@ -233,6 +233,11 @@ You can find configuration examples in the [examples](examples) folder
 
 Pre-run commands are run on the local machine before any files are processed.
 
+```sh
+pre-run:
+  - echo 'I am run at the begining, before any file is downloaded'
+```
+
 If you plan for other people to neat your repo, you should make sure these commands can run on any OS, or tell otherwise in your README.
 
 ### Ask questions
@@ -452,6 +457,11 @@ ignore: [README.md]
 ### Post-run
 
 Post-run commands are run on the local machine after files are processed.
+
+```sh
+post-run:
+  - echo 'I am run at the end'
+```
 
 If you plan for other people to neat your repo, you should make sure these commands can run on any OS, or tell otherwise in your README.
 

@@ -1,14 +1,15 @@
 import { Command, flags } from "@oclif/command";
 import chalk from "chalk";
-import { exec as syncExec } from "child_process";
+import { exec } from "child_process";
 import cli from "cli-ux";
 import inquirer from "inquirer";
-import { format, promisify } from "util";
 import { ChunkLogType, LocalFolder } from "./lib/LocalFolder";
 import { NeatConfig } from "./lib/NeatConfig";
 import { RemoteRepo, TreeType } from "./lib/RemoteRepo";
 
-const exec = promisify(syncExec);
+// ${chalk.green("✔️")}
+// ${chalk.yellow("⚠️")}
+// ${chalk.red("x")}
 
 class Neat extends Command {
   static description =
@@ -62,7 +63,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
 
   async run() {
     const { args, flags } = this.parse(Neat);
-    let envVars: { [key: string]: string } = {};
+    let envVars = process.env;
     if (!args.repository) return this._help();
 
     // Get path if input was a neat repo
@@ -71,7 +72,8 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
       : await RemoteRepo.getNeatRepoPath(args.repository).catch(this.error);
 
     // Show initialization message
-    this.log(`Using https://github.com/${chalk.cyan(repository)}`);
+
+    this.log(chalk.cyan(`Using https://github.com/${repository}`));
 
     // Initialize remote repository
     const remote = new RemoteRepo(repository);
@@ -95,28 +97,10 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
 
     // Run pre-run commands
     if (neatConfig.hasPreRun()) {
-      await Promise.all(
-        neatConfig.preRun.map(
-          async (command: string) => await this.execCommand(command)
-        )
-      ).catch(this.error);
+      for (const command of neatConfig.preRun) {
+        await this.execCommand(command, args.folder, envVars);
+      }
     }
-
-    // Download files
-    const [
-      addedFiles,
-      skippedFiles,
-      addedDirs,
-      skippedDirs,
-    ] = await local.downloadTree(tree, neatConfig.ignore).catch(this.error);
-
-    // Log added files to console
-    this.logGreen(`Files added: ${addedFiles.length}`);
-    if (addedFiles.length) addedFiles.join("\n");
-
-    // Log skipped files to console
-    this.logYellow(`Files skipped: ${skippedFiles.length}`);
-    if (skippedFiles.length) this.log(skippedFiles.join("\n"));
 
     // Ask questions
     if (neatConfig.hasQuestions()) {
@@ -131,6 +115,24 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
       const envAskVars = neatConfig.getEnvFromAnswers(answers);
 
       envVars = { ...envVars, ...envAskVars };
+    }
+
+    // Download files
+    const [
+      addedFiles,
+      skippedFiles,
+      addedDirs,
+      skippedDirs,
+    ] = await local.downloadTree(tree, neatConfig.ignore).catch(this.error);
+
+    // Log added files to console
+    this.log(`${chalk.green("✔️")} ${addedFiles.length} file(s) added:`);
+    if (addedFiles.length) this.log(chalk.grey(addedFiles.join("\n")));
+
+    // Log skipped files to console
+    if (skippedFiles.length) {
+      this.log(`${chalk.red("x")} ${skippedFiles.length} file(s) skipped:`);
+      this.log(chalk.grey(skippedFiles.join("\n")));
     }
 
     // Replace files
@@ -152,14 +154,19 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
         .catch(this.error);
 
       // Log added chunks to console
-      this.logGreen(`Chunks injected: ${addedChunks.length}`);
+      this.log(`${chalk.green("✔️")} ${addedChunks.length} chunk(s) injected:`);
       if (addedChunks.length)
-        this.log(addedChunks.map(local.chunkToString).sort().join("\n"));
+        this.log(
+          chalk.grey(addedChunks.map(local.chunkToString).sort().join("\n"))
+        );
 
       // Log skipped chunks to console
-      this.logYellow(`Chunks skipped: ${skippedChunks.length}`);
-      if (skippedChunks.length)
-        this.log(skippedChunks.map(local.chunkToString).sort().join("\n"));
+      if (skippedChunks.length) {
+        this.log(`${chalk.red("x")} ${skippedChunks.length} chunk(s) skipped:`);
+        this.log(
+          chalk.grey(skippedChunks.map(local.chunkToString).sort().join("\n"))
+        );
+      }
     }
 
     // Run post-run commands
@@ -176,31 +183,33 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
         ),
       };
 
-      await Promise.all(
-        neatConfig.postRun.map((command: string) =>
-          this.execCommand(command, { env: envVars })
-        )
-      ).catch(this.error);
+      for (const command of neatConfig.postRun) {
+        await this.execCommand(command, args.folder, envVars);
+      }
     }
+
+    this.log(chalk.green("Your repo is ready!"));
   }
 
   // Function to execute pre/post run commands
-  async execCommand(command: string, env = {}) {
-    const { stdout, stderr } = await exec(command, env);
-    if (stderr) this.error(stderr);
-    else this.log(format("%s\n%s", chalk.grey(command), stdout));
-  }
-
-  logGreen(text: string) {
-    return this.log(chalk.green(text));
-  }
-
-  logYellow(text: string) {
-    return this.log(chalk.yellow(text));
-  }
-
-  logRed(text: string) {
-    return this.log(chalk.red(text));
+  async execCommand(command: string, folder: string, env = {}) {
+    return new Promise((resolve) => {
+      cli.action.start(command);
+      const output = exec(
+        command,
+        {
+          env: env,
+          cwd: folder,
+        },
+        resolve
+      );
+      if (output != null) {
+        if (output.stdout != null) output.stdout.on("data", this.log);
+        if (output.stderr != null)
+          output.stderr.on("data", (d) => this.log(chalk.red(d)));
+        output.on("close", () => cli.action.stop(chalk.green("✔️")));
+      }
+    });
   }
 
   async dryRun(tree: TreeType[], neatConfig: NeatConfig, local: LocalFolder) {
@@ -230,29 +239,43 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     } else {
       if (neatConfig.hasPreRun()) {
         // Preview pre-run commands
-        this.logRed(
-          `Commands to be run before processing: ${neatConfig.preRun.length}`
+        this.log(
+          `${chalk.yellow("⚠️")} ${chalk.bold(
+            neatConfig.preRun.length
+          )} command(s) will be run before processing:`
         );
-        neatConfig.preRun.map((command) => this.log(command));
+        neatConfig.preRun.map((command) => this.log(chalk.grey(command)));
       }
 
       // Preview post-run commands
       if (neatConfig.hasPostRun()) {
-        this.logRed(
-          `Commands to be run after processing: ${neatConfig.postRun.length}`
+        this.log(
+          `${chalk.yellow("⚠️")} ${chalk.bold(
+            neatConfig.postRun.length
+          )} command(s) will be run after processing:`
         );
-        neatConfig.postRun.map((command) => this.log(command));
+        neatConfig.postRun.map((command) => this.log(chalk.grey(command)));
       }
 
       // Preview files to add
-      this.logGreen(`Files to be added: ${filesToAdd.length}`);
-      if (filesToAdd.length) this.log(filesToAdd.join("\n"));
+      this.log(
+        `${chalk.yellow("⚠️")} ${chalk.bold(
+          filesToAdd.length
+        )} file(s) will be added:`
+      );
+      if (filesToAdd.length) this.log(chalk.grey(filesToAdd.join("\n")));
 
       // Preview chunks to add
       if (neatConfig.hasChunks())
-        this.logGreen(`Chunks to be injected: ${chunksToAdd.length}`);
+        this.log(
+          `${chalk.yellow("⚠️")} ${chalk.bold(
+            chunksToAdd.length
+          )} chunk(s) will be injected:`
+        );
       if (chunksToAdd.length)
-        this.log(chunksToAdd.map(local.chunkToString).sort().join("\n"));
+        this.log(
+          chalk.grey(chunksToAdd.map(local.chunkToString).sort().join("\n"))
+        );
 
       // Ask for confirmation to proceed
       await cli.anykey();

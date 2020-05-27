@@ -1,4 +1,4 @@
-post_run:
+post-run:
   - echo 'goodbye world'
   - echo $NEAT_ALL_FILES_DIRS
   - echo $NEAT_ADDED_FILES_DIRS

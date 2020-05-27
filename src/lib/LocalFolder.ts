@@ -155,50 +155,48 @@ export class LocalFolder {
     const skippedChunks: Array<ChunkLogType> = [];
 
     await Promise.all(
-      chunks
-        .filter((chunk) => this.onlyAllowedArrayFilter(chunk.target, ignore))
-        .map(async (chunk) => {
-          let sourceType: string, source: string;
-          if (chunk.file) {
-            sourceType = "file";
-            source = chunk.file;
-          } else if (chunk.url) {
-            sourceType = "url";
-            source = chunk.url;
-          } else if (chunk.command) {
-            sourceType = "command";
-            source = chunk.command;
-          } else throw "Unknown chunk type";
+      chunks.map(async (chunk) => {
+        let sourceType: string, source: string;
+        if (chunk.file) {
+          sourceType = "file";
+          source = chunk.file;
+        } else if (chunk.url) {
+          sourceType = "url";
+          source = chunk.url;
+        } else if (chunk.command) {
+          sourceType = "command";
+          source = chunk.command;
+        } else throw "Unknown chunk type";
 
-          const target = this.dir + chunk.target;
-          return await this.injectChunk(
-            sourceType as "url" | "file" | "command",
-            source,
-            target,
-            chunk.pattern,
-            this.forceInject,
-            preview
-          )
-            .then((injected) => {
-              if (injected === true)
-                addedChunks.push({
-                  target: target,
-                  source: source,
-                });
-              else
-                skippedChunks.push({
-                  target: target,
-                  source: source,
-                });
-            })
-            .catch((err) => {
+        const target = this.dir + chunk.target;
+        return await this.injectChunk(
+          sourceType as "url" | "file" | "command",
+          source,
+          target,
+          chunk.pattern,
+          this.forceInject,
+          preview
+        )
+          .then((injected) => {
+            if (injected === true)
+              addedChunks.push({
+                target: target,
+                source: source,
+              });
+            else
               skippedChunks.push({
                 target: target,
                 source: source,
-                error: err,
               });
+          })
+          .catch((err) => {
+            skippedChunks.push({
+              target: target,
+              source: source,
+              error: err,
             });
-        })
+          });
+      })
     );
 
     return [addedChunks, skippedChunks];

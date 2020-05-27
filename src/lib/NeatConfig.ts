@@ -16,11 +16,15 @@ export class NeatConfig {
   constructor(config: string, readonly base_url: string) {
     const yaml = parse(config) || {};
 
-    // pre_run
-    this.preRun = yaml.pre_run ? this.parseArrayStrings(yaml.pre_run) : [];
+    // pre-run
+    this.preRun = yaml["pre-run"]
+      ? this.parseArrayStrings(yaml["pre-run"])
+      : [];
 
-    // post_run
-    this.postRun = yaml.post_run ? this.parseArrayStrings(yaml.post_run) : [];
+    // post-run
+    this.postRun = yaml["post-run"]
+      ? this.parseArrayStrings(yaml["post-run"])
+      : [];
 
     // ignore
     this.ignore = yaml.ignore ? this.parseArrayStrings(yaml.ignore) : [];
@@ -222,11 +226,18 @@ export class NeatConfig {
               : `<!-- ${input.id} -->`,
         };
 
-        if (input.file)
-          this.ignore && this.ignore.includes(input.file)
-            ? (chunk.url = this.base_url + input.file)
-            : (chunk.file = input.file);
-        else if (input.command) chunk.command = input.command;
+        if (input.file) {
+          const folderRegex = new RegExp(
+            `^(${this.ignore.map((v) => v.replace(/\/$/, "")).join("|")})/`,
+            "i"
+          );
+          if (
+            this.ignore.length > 0 &&
+            (this.ignore.includes(input.file) || folderRegex.test(input.file))
+          ) {
+            chunk.url = this.base_url + input.file;
+          } else chunk.file = input.file;
+        } else if (input.command) chunk.command = input.command;
       }
     }
     return chunk;

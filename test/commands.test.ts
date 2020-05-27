@@ -56,7 +56,7 @@ describe("COMMANDS", () => {
       .stdout()
       .do(() => cmd.run(["test"]))
       .it("runs without a folder argument", (ctx) => {
-        expect(ctx.stdout).to.contain("Files added: 3");
+        expect(ctx.stdout).to.contain("3 file(s) added");
         expectFilesContentToMatch();
       });
 
@@ -66,7 +66,7 @@ describe("COMMANDS", () => {
       .stdout()
       .do(() => cmd.run(["test", folder]))
       .it("runs with a folder argument", (ctx) => {
-        expect(ctx.stdout).to.contain("Files added: 3");
+        expect(ctx.stdout).to.contain("3 file(s) added");
         expectFilesContentToMatch(folder);
       });
 
@@ -75,7 +75,7 @@ describe("COMMANDS", () => {
       .stdout()
       .do(() => cmd.run(["test/test"]))
       .it("runs with any repo", (ctx) => {
-        expect(ctx.stdout).to.contain("Files added: 3");
+        expect(ctx.stdout).to.contain("3 file(s) added");
         expectFilesContentToMatch();
       });
 
@@ -84,7 +84,7 @@ describe("COMMANDS", () => {
       .stdout()
       .do(() => cmd.run(["test/test@v1"]))
       .it("runs with any branch", (ctx) => {
-        expect(ctx.stdout).to.contain("Files added: 3");
+        expect(ctx.stdout).to.contain("3 file(s) added");
         expectFilesContentToMatch();
       });
 
@@ -157,8 +157,8 @@ describe("COMMANDS", () => {
       .stub(cli, "anykey", () => async () => Promise.resolve())
       .stdout()
       .do(() => cmd.run(["test"]))
-      .it("skips files when force is not set", (ctx) => {
-        expect(ctx.stdout).to.contain("Files skipped: 3");
+      .it("skips file(s) when force is not set", (ctx) => {
+        expect(ctx.stdout).to.contain("3 file(s) skipped");
         expectFilesContentToMatch();
       });
 
@@ -168,8 +168,8 @@ describe("COMMANDS", () => {
       .do(() => cmd.run(["test"]))
       .stdout()
       .do(() => cmd.run(["test", "--force"]))
-      .it("overwrites files if force is set", (ctx) => {
-        expect(ctx.stdout).to.contain("Files added: 3");
+      .it("overwrites file(s) if force is set", (ctx) => {
+        expect(ctx.stdout).to.contain("3 file(s) added");
         expectFilesContentToMatch();
       });
 
@@ -179,8 +179,8 @@ describe("COMMANDS", () => {
       .do(() => cmd.run(["test"]))
       .stdout()
       .do(() => cmd.run(["test", "--force-download"]))
-      .it("overwrites files if force-download is set", (ctx) => {
-        expect(ctx.stdout).to.contain("Files added: 3");
+      .it("overwrites file(s) if force-download is set", (ctx) => {
+        expect(ctx.stdout).to.contain("3 file(s) added");
         expectFilesContentToMatch();
       });
 
@@ -191,8 +191,8 @@ describe("COMMANDS", () => {
       .stub(cli, "anykey", () => async () => Promise.resolve())
       .stdout()
       .do(() => cmd.run(["test", "--force-inject"]))
-      .it("skips files when only force-inject is set", (ctx) => {
-        expect(ctx.stdout).to.contain("Files skipped: 3");
+      .it("skips file(s) when only force-inject is set", (ctx) => {
+        expect(ctx.stdout).to.contain("3 file(s) skipped");
         expectFilesContentToMatch();
       });
   });
@@ -212,7 +212,7 @@ describe("COMMANDS", () => {
       .stdout()
       .do(() => cmd.run(["test", "--only", ".md$"]))
       .it("runs only for markdown files", (ctx) => {
-        expect(ctx.stdout).to.contain("Files added: 1");
+        expect(ctx.stdout).to.contain("1 file(s) added");
         expectFilesContentToMatch("./", ["test/test.md"]);
       });
 
@@ -221,7 +221,7 @@ describe("COMMANDS", () => {
       .stdout()
       .do(() => cmd.run(["test", "--only", ".(md|txt)$"]))
       .it("runs only for markdown and text files", (ctx) => {
-        expect(ctx.stdout).to.contain("Files added: 2");
+        expect(ctx.stdout).to.contain("2 file(s) added");
         expectFilesContentToMatch("./", ["test/test.md", "test/test.txt"]);
       });
   });
@@ -240,7 +240,7 @@ describe("COMMANDS", () => {
       .stdout()
       .do(() => cmd.run(["test", "--except", ".md$"]))
       .it("runs ignoring markdown files", (ctx) => {
-        expect(ctx.stdout).to.contain("Files added: 2");
+        expect(ctx.stdout).to.contain("2 file(s) added");
         expectFilesContentToMatch("./", ["test/test.txt", "test/test.html"]);
       });
 
@@ -249,7 +249,7 @@ describe("COMMANDS", () => {
       .stdout()
       .do(() => cmd.run(["test", "--except", ".(md|txt)$"]))
       .it("runs ignoring markdown and text files", (ctx) => {
-        expect(ctx.stdout).to.contain("Files added: 1");
+        expect(ctx.stdout).to.contain("1 file(s) added");
         expectFilesContentToMatch("./", ["test/test.html"]);
       });
   });
