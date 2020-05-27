@@ -12,6 +12,6 @@ jobs:
       - name: Generate and commit table of content
         uses: technote-space/toc-generator@v2
         with:
-          TARGET_PATHS: docs/README.md
+          TARGET_PATHS: README.md
           TOC_TITLE: ""
           MAX_HEADER_LEVEL: 3
