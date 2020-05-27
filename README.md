@@ -233,7 +233,7 @@ You can find configuration examples in the [examples](examples) folder
 
 Pre-run commands are run on the local machine before any files are processed.
 
-```sh
+```yml
 pre-run:
   - echo 'I am run at the begining, before any file is downloaded'
 ```
@@ -330,7 +330,7 @@ You can specify which pattern to replace. By default, it will search and replace
 
 **Example:** Replace HTML comments
 
-```sh
+```yml
 ask:
   - id: project_name
     description: What is your project name?
@@ -344,7 +344,7 @@ You can specify which files to run replacements on. By default, it will search a
 
 **Example:** Make replacements only in markdown and text files
 
-```sh
+```yml
 ask:
   - id: project_name
     description: What is your project name?
@@ -360,7 +360,7 @@ This is useful to maintain a text file that contains both sections pertaining to
 
 You can specify either a `file` or a `command` as the source.
 
-```sh
+```yml
 inject:
   - id: hello
     command: echo "hello world"
@@ -387,7 +387,7 @@ If it cannot find this pattern in the target file, Neat will add it at the botto
 
 You can customize the replacement pattern:
 
-```sh
+```yml
 inject:
   - id: hello
     command: echo "hello world"
@@ -399,7 +399,7 @@ inject:
 
 This example will find the pattern `<!-- hello -->` and replace it with `hello world` in both targets
 
-```sh
+```yml
 inject:
   - id: hello
     command: echo "hello world"
@@ -410,13 +410,13 @@ inject:
 
 For example, if your neat repo is using a README.md to describe what it can do and how to use it but you don't want this README.md to be downloaded when someone neats it, [you can ignore it](#ignore-files).
 
-```sh
+```yml
 ignore: [README.md]
 ```
 
 - Using `ignore` in conjunction with `inject`:
 
-  ```sh
+  ```yml
   ignore: [README.md]
   inject:
     - id: hello
@@ -431,7 +431,7 @@ ignore: [README.md]
 
 - If the source file for the injection is ignored:
 
-  ```sh
+  ```yml
   ignore: [readme/support.md]
   inject:
     - id: support
@@ -450,7 +450,7 @@ You can specify a list of relative paths to files that should be ignored (aka ne
 
 You could use it to provide a documentation for your template in a `README.md` but you don't want this to be included when people neat your template:
 
-```sh
+```yml
 ignore: [README.md]
 ```
 
@@ -458,7 +458,7 @@ ignore: [README.md]
 
 Post-run commands are run on the local machine after files are processed.
 
-```sh
+```yml
 post-run:
   - echo 'I am run at the end'
 ```
