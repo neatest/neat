@@ -352,6 +352,19 @@ ask:
 replace_filter: \.(md|txt)$
 ```
 
+### Pre-download
+
+Pre-download commands are run on the local machine before any files are processed but just after asking questions, so you can have access to the [answers environment variables](#answers-environment-variables).
+
+```yml
+ask:
+  - id: project_name
+pre-download:
+  - echo $NEAT_ASK_PROJECT_NAME
+```
+
+If you plan for other people to neat your repo, you should make sure these commands can run on any OS, or tell otherwise in your README.
+
 ### Inject files
 
 You can specify a list of files or command outputs to be "injected" into specific files.

@@ -66,6 +66,26 @@ describe("CONFIG", () => {
   });
 
   /**
+   * pre-download
+   */
+  describe("pre-download", () => {
+    test
+      .stub(cli, "anykey", () => async () => Promise.resolve())
+      .nock("https://raw.githubusercontent.com", (nock) => {
+        nock
+          .get("/test/test/master/.neat.yml")
+          .replyWithFile(200, "examples/pre-download/.neat.yml");
+      })
+      .stderr()
+      .stdout()
+      .do(() => cmd.run(["test"]))
+      .it("runs when pre-download commands are specified", (ctx) => {
+        expect(ctx.stdout).to.contain("hello world");
+        expectFilesContentToMatch();
+      });
+  });
+
+  /**
    * post-run
    */
   describe("post-run", () => {

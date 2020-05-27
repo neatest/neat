@@ -97,6 +97,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
 
     // Run pre-run commands
     if (neatConfig.hasPreRun()) {
+      this.log("Execute pre-run commands...");
       for (const command of neatConfig.preRun) {
         await this.execCommand(command, args.folder, envVars);
       }
@@ -115,6 +116,14 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
       const envAskVars = neatConfig.getEnvFromAnswers(answers);
 
       envVars = { ...envVars, ...envAskVars };
+    }
+
+    // Run pre-download commands
+    if (neatConfig.hasPreDownload()) {
+      this.log("Execute pre-download commands...");
+      for (const command of neatConfig.preDownload) {
+        await this.execCommand(command, args.folder, envVars);
+      }
     }
 
     // Download files
@@ -183,6 +192,8 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
         ),
       };
 
+      this.log("Execute post-run commands...");
+
       for (const command of neatConfig.postRun) {
         await this.execCommand(command, args.folder, envVars);
       }
@@ -237,14 +248,24 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     ) {
       return false;
     } else {
+      // Preview pre-run commands
       if (neatConfig.hasPreRun()) {
-        // Preview pre-run commands
         this.log(
           `${chalk.yellow("⚠️")} ${chalk.bold(
             neatConfig.preRun.length
           )} command(s) will be run before processing:`
         );
         neatConfig.preRun.map((command) => this.log(chalk.grey(command)));
+      }
+
+      // Preview pre-download commands
+      if (neatConfig.hasPreDownload()) {
+        this.log(
+          `${chalk.yellow("⚠️")} ${chalk.bold(
+            neatConfig.preDownload.length
+          )} command(s) will be run before downloading files:`
+        );
+        neatConfig.preDownload.map((command) => this.log(chalk.grey(command)));
       }
 
       // Preview post-run commands

@@ -1,0 +1,4 @@
+ask:
+  - id: project_name
+pre-download:
+  - echo $NEAT_ASK_PROJECT_NAME

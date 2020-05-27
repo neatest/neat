@@ -3,6 +3,7 @@ import { parse } from "yaml";
 
 export class NeatConfig {
   preRun: Array<string>;
+  preDownload: Array<string>;
   postRun: Array<string>;
   ignore: Array<string>;
   questions: Array<NeatConfigQuestionType>;
@@ -19,6 +20,11 @@ export class NeatConfig {
     // pre-run
     this.preRun = yaml["pre-run"]
       ? this.parseArrayStrings(yaml["pre-run"])
+      : [];
+
+    // pre-download
+    this.preDownload = yaml["pre-download"]
+      ? this.parseArrayStrings(yaml["pre-download"])
       : [];
 
     // post-run
@@ -60,6 +66,10 @@ export class NeatConfig {
 
   hasPreRun() {
     return this.preRun && this.preRun.length > 0 ? true : false;
+  }
+
+  hasPreDownload() {
+    return this.preDownload && this.preDownload.length > 0 ? true : false;
   }
 
   hasPostRun() {
