@@ -338,7 +338,13 @@ export class LocalFolder {
   }
 
   onlyAllowedArrayFilter(path: string, ignore: Array<string>): boolean {
-    if (ignore.length > 0 && ignore.includes(path)) return false;
+    const folderRegex = new RegExp(
+      `^(${ignore.map((v) => v.replace(/\/$/, "")).join("|")})/`,
+      "i"
+    );
+
+    if (ignore.length > 0 && (ignore.includes(path) || folderRegex.test(path)))
+      return false;
 
     if (this.only) return this.only.test(path);
     else if (this.except) return !this.except.test(path);

@@ -97,6 +97,33 @@ describe("CONFIG", () => {
         expect(ctx.stdout).to.contain("Files added: 2");
         expectFilesContentToMatch("./", ["test/test.html", "test/test.txt"]);
       });
+
+    test
+      .stub(cli, "anykey", () => async () => Promise.resolve())
+      .nock("https://api.github.com/repos/test/test/git/trees", (nock) => {
+        nock.get("/ignore?recursive=1").reply(200, {
+          tree: [
+            { path: "test", type: "tree" },
+            { path: "test/test.md", type: "blob" },
+            { path: "test/test.txt", type: "blob" },
+            { path: "test/test.html", type: "blob" },
+            { path: "test/hello/test.html", type: "blob" },
+          ],
+        });
+      })
+      .nock("https://raw.githubusercontent.com", (nock) => {
+        nock
+          .get("/test/test/ignore/.neat.yml")
+          .reply(200, "ignore: [test/hello]");
+      })
+      .stdout()
+      .do(() => cmd.run(["test@ignore"]))
+      .it(
+        "does not download certain files when they are in an ignored folder",
+        (ctx) => {
+          expect(ctx.stdout).to.contain("Files added: 3");
+        }
+      );
   });
 
   /**
