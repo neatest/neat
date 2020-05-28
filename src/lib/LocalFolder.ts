@@ -100,9 +100,7 @@ export class LocalFolder {
     // Download files
     await Promise.all(
       tree
-        .filter((v) =>
-          this.onlyAllowedFilesArrayFilter(v, ignore.concat(".neat.yml"))
-        )
+        .filter((v) => this.onlyAllowedFilesArrayFilter(v, ignore))
         .map((file) => {
           const path = `${this.dir}${file.path}`;
 
