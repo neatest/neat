@@ -236,6 +236,9 @@ export class NeatConfig {
         input.target &&
         (Array.isArray(input.target) || typeof input.target === "string") &&
         ((input.file && typeof input.file === "string") ||
+          (input.url &&
+            typeof input.url === "string" &&
+            /https?:\/\//i.test(input.url)) ||
           (input.command && typeof input.command === "string"))
       ) {
         chunk = {
@@ -258,7 +261,8 @@ export class NeatConfig {
           ) {
             chunk.url = this.base_url + input.file;
           } else chunk.file = input.file;
-        } else if (input.command) chunk.command = input.command;
+        } else if (input.url) chunk.url = input.url;
+        else if (input.command) chunk.command = input.command;
       }
     }
     return chunk;

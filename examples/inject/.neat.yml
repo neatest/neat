@@ -1,8 +1,11 @@
 inject:
   - id: support
-    file: test/test.md
-    target: test/test.html
+    file: test/test.txt
+    target: test/test.md
     pattern: "<!-- auto-support -->"
   - id: hello
     command: echo "hello world"
-    target: [test/test.txt]
+    target: test/test.txt
+  - id: test
+    url: https://test.com/content.html
+    target: [test/test.html]

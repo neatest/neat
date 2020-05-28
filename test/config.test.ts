@@ -309,16 +309,24 @@ describe("CONFIG", () => {
           .get("/test/test/master/.neat.yml")
           .replyWithFile(200, "examples/inject/.neat.yml");
       })
+      .nock("https://test.com", (nock) => {
+        nock
+          .get("/content.html")
+          .twice() // Because of dry-run using up one
+          .reply(200, "<html>hello world</html>");
+      })
+      .stderr()
       .stdout()
       .do(() => cmd.run(["test"]))
       .it("injects when no pattern is found", (ctx) => {
         expect(ctx.stdout)
-          .to.contain("2 chunk(s) injected")
+          .to.contain("3 chunk(s) injected")
           .and.to.contain("3 file(s) added");
 
-        const htmlContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}\n\n<!-- auto-support -->`;
+        const mdContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}\n\n<!-- auto-support -->`;
         const txtContent = `${testContent}\n\n<!-- hello -->\n\nhello world\n\n<!-- hello -->`;
-        expectFilesContentToMatch("./", ["test/test.md"]);
+        const htmlContent = `${testContent}\n\n<!-- test -->\n\n<html>hello world</html>\n\n<!-- test -->`;
+        expectFilesContentToMatch("./", ["test/test.md"], mdContent);
         expectFilesContentToMatch("./", ["test/test.txt"], txtContent);
         expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
       });
@@ -358,18 +366,25 @@ describe("CONFIG", () => {
           .twice()
           .replyWithFile(200, "examples/inject/.neat.yml");
       })
+      .nock("https://test.com", (nock) => {
+        nock
+          .get("/content.html")
+          .twice() // Because of dry-run using up one
+          .reply(200, "<html>hello world</html>");
+      })
       .stdout()
       .do(() => cmd.run(["test"]))
       .stdout()
       .do(() => cmd.run(["test"]))
       .it("doesn't inject when a double pattern is found", (ctx) => {
         expect(ctx.stdout)
-          .to.contain("2 chunk(s) skipped")
+          .to.contain("3 chunk(s) skipped")
           .and.to.contain("3 file(s) skipped");
 
-        const htmlContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}\n\n<!-- auto-support -->`;
+        const mdContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}\n\n<!-- auto-support -->`;
         const txtContent = `${testContent}\n\n<!-- hello -->\n\nhello world\n\n<!-- hello -->`;
-        expectFilesContentToMatch("./", ["test/test.md"]);
+        const htmlContent = `${testContent}\n\n<!-- test -->\n\n<html>hello world</html>\n\n<!-- test -->`;
+        expectFilesContentToMatch("./", ["test/test.md"], mdContent);
         expectFilesContentToMatch("./", ["test/test.txt"], txtContent);
         expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
       });
@@ -415,6 +430,12 @@ describe("CONFIG", () => {
             .twice()
             .replyWithFile(200, "examples/inject/.neat.yml");
         })
+        .nock("https://test.com", (nock) => {
+          nock
+            .get("/content.html")
+            .times(4) // Because of dry-run using up two
+            .reply(200, "<html>hello world</html>");
+        })
         .stdout()
         .do(() => cmd.run(["test"]))
         .stdout()
@@ -423,12 +444,13 @@ describe("CONFIG", () => {
           "injects when double pattern exists already and force-inject is set",
           (ctx) => {
             expect(ctx.stdout)
-              .to.contain("2 chunk(s) injected")
+              .to.contain("3 chunk(s) injected")
               .and.to.contain("0 file(s) added");
 
-            const htmlContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}\n\n<!-- auto-support -->`;
             const txtContent = `${testContent}\n\n<!-- hello -->\n\nhello world\n\n<!-- hello -->`;
-            expectFilesContentToMatch("./", ["test/test.md"]);
+            const mdContent = `${testContent}\n\n<!-- auto-support -->\n\n${txtContent}\n\n<!-- auto-support -->`;
+            const htmlContent = `${testContent}\n\n<!-- test -->\n\n<html>hello world</html>\n\n<!-- test -->`;
+            expectFilesContentToMatch("./", ["test/test.md"], mdContent);
             expectFilesContentToMatch("./", ["test/test.txt"], txtContent);
             expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
           }
