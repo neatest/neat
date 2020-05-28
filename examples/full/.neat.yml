@@ -1,4 +1,10 @@
+symlink:
+  - README.md: readme-content.md
+
 pre-run: echo 'hello world'
+
+ignore: [README.md]
+
 ask:
   - id: project_name
     description: What is your project name?
@@ -16,17 +22,25 @@ ask:
       - "Issue templates": true
   - id: support_url
     replace: true
+
 replace_pattern: "{{%s}}"
 replace_filter: \.(md|txt)$
-ignore: [README.md]
+
+pre-download:
+  - echo $NEAT_ASK_PROJECT_NAME
+
 inject:
   - id: support
-    file: test/test.md
-    target: test.html
+    file: readme/support.md
+    target: README.md
     pattern: "<!-- auto-support -->"
   - id: hello
     command: echo "hello world"
-    target: [test.txt]
+    target: [hello.txt, hello.md]
+  - id: google
+    url: https://google.com
+    target: google.html
+
 post-run:
   - echo $NEAT_ASK_PROJECT_NAME
   - echo $NEAT_ASK_CI
