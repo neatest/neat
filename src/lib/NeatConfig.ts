@@ -3,6 +3,7 @@ import { parse } from "yaml";
 
 export class NeatConfig {
   preRun: Array<string>;
+  symLink: Array<SymLinkType>;
   preDownload: Array<string>;
   postRun: Array<string>;
   ignore: Array<string>;
@@ -21,6 +22,12 @@ export class NeatConfig {
     this.preRun = yaml["pre-run"]
       ? this.parseArrayStrings(yaml["pre-run"])
       : [];
+
+    // symlink
+    this.symLink =
+      yaml.symlink && Array.isArray(yaml.symlink) && yaml.symlink.length > 0
+        ? yaml.symlink.filter(this.onlySymLinkArrayFilter)
+        : [];
 
     // pre-download
     this.preDownload = yaml["pre-download"]
@@ -62,6 +69,10 @@ export class NeatConfig {
 
   hasChunks() {
     return this.chunks && this.chunks.length > 0 ? true : false;
+  }
+
+  hasSymLink() {
+    return this.symLink && this.symLink.length > 0 ? true : false;
   }
 
   hasPreRun() {
@@ -273,6 +284,15 @@ export class NeatConfig {
       typeof value[Object.keys(value)[0]] === "boolean"
     );
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onlySymLinkArrayFilter(value: any) {
+    return (
+      typeof value === "object" &&
+      Object.keys(value)[0] &&
+      typeof value[Object.keys(value)[0]] === "string"
+    );
+  }
 }
 
 export type NeatConfigReplacementType = {
@@ -290,6 +310,9 @@ export type NeatConfigQuestionType = {
 
 export interface ChunkType extends TempChunkType {
   target: string;
+}
+export interface SymLinkType {
+  [k: string]: string;
 }
 
 interface TempChunkType {

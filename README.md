@@ -5,7 +5,6 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [💾 Installation](#-installation)
 - [🔥 CLI usage](#-cli-usage)
   - [Use a "registered" repo](#use-a-registered-repo)
@@ -241,6 +240,24 @@ pre-run:
 ```
 
 If you plan for other people to neat your repo, you should make sure these commands can run on any OS, or tell otherwise in your README.
+
+### Symbolic links
+
+Sometimes, it is necessary for one file's content to be another file's content.
+Any specified symbolic links are created before downloading any files.
+
+For example, the most common use case is that you have a readme explaining how to use your Neat template. But you don't want this readme to be the default readme once your user has neated your template. Instead, you prepared another readme.
+
+```yml
+symlink:
+  - README.md: README.tpl.md
+```
+
+Essentially, in this example:
+
+- The content of README.md will be replaced with the content of README.tpl.md
+- README.tpl.md will be ignored from processing
+- Neat will process README.md like any other file, including replacements, injections or even ignoring it.
 
 ### Ask questions
 

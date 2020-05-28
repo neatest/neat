@@ -119,6 +119,9 @@ describe("COMMANDS", () => {
       .nock("https://api.github.com/repos/test/test/git/trees", (nock) => {
         nock.get("/empty?recursive=1").reply(200, { tree: [] });
       })
+      .nock("https://raw.githubusercontent.com/test/test/empty", (nock) => {
+        nock.get("/.neat.yml").reply(404);
+      })
       .stdout()
       .do(() => cmd.run(["test/test@empty"]))
       .catch((ctx) => {

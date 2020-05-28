@@ -66,6 +66,26 @@ describe("CONFIG", () => {
   });
 
   /**
+   * symlink
+   */
+  describe("symlink", () => {
+    test
+      .stub(cli, "anykey", () => async () => Promise.resolve())
+      .nock("https://raw.githubusercontent.com", (nock) => {
+        nock
+          .get("/test/test/master/.neat.yml")
+          .replyWithFile(200, "examples/symlink/.neat.yml");
+      })
+      .stderr()
+      .stdout()
+      .do(() => cmd.run(["test"]))
+      .it("runs when symlinks are specified", (ctx) => {
+        expect(ctx.stdout).to.contain("2 file(s) added");
+        expectFilesContentToMatch("./", ["test/test.html", "test/test.md"]);
+      });
+  });
+
+  /**
    * pre-download
    */
   describe("pre-download", () => {

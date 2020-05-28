@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { NeatConfig } from "./NeatConfig";
+import { NeatConfig, SymLinkType } from "./NeatConfig";
 
 export class RemoteRepo {
   protected static neat_repos =
@@ -48,7 +48,8 @@ export class RemoteRepo {
 
   // Get config object
   public async getConfig(): Promise<NeatConfig> {
-    return this.config || this.fetchNeatConfig();
+    if (this.config == null) this.config = await this.fetchNeatConfig();
+    return this.config;
   }
 
   // Get remote repository tree
@@ -78,6 +79,8 @@ export class RemoteRepo {
 
   // Fetch remote repository tree
   protected async fetchTree(): Promise<Array<TreeType>> {
+    await this.getConfig();
+
     return fetch(
       `${this.api_endpoint}/repos/${this.repository}/git/trees/${this.branch}?recursive=1`
     )
@@ -88,15 +91,32 @@ export class RemoteRepo {
       .then((res) => {
         if (!res.tree || res.tree.length == 0)
           throw `${this.repository}@${this.branch} is empty`;
-        return res.tree.map(
+
+        const symlinked: Array<string> = [];
+        const tree = res.tree.map(
           (entry: { path: string; type: string }): TreeType => {
+            let url = `${this.raw_endpoint}/${this.repository}/${this.branch}/${entry.path}`;
+
+            if (this.config && this.config.hasSymLink()) {
+              this.config.symLink.forEach((val: SymLinkType) => {
+                const target = Object.keys(val)[0];
+                const source = val[Object.keys(val)[0]];
+                if (entry.path == target) {
+                  url = `${this.raw_endpoint}/${this.repository}/${this.branch}/${source}`;
+                  symlinked.push(source);
+                }
+              });
+            }
+
             return {
               path: entry.path,
               type: entry.type == "tree" ? "tree" : "blob",
-              url: `${this.raw_endpoint}/${this.repository}/${this.branch}/${entry.path}`,
+              url: url,
             };
           }
         );
+
+        return tree.filter((v: TreeType) => !symlinked.includes(v.path));
       });
   }
 }
