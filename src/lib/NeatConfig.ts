@@ -95,9 +95,8 @@ export class NeatConfig {
     return Object.keys(answers).map((key: string) => {
       if (this.to_replace.includes(key)) {
         const answer = answers[key];
-        this.replacements[format(this.replacePattern, key)] = Array.isArray(
-          answer
-        )
+        const pattern = format(this.replacePattern, key);
+        this.replacements[pattern] = Array.isArray(answer)
           ? answer.join(", ")
           : answer;
       }
@@ -129,7 +128,7 @@ export class NeatConfig {
   }
 
   formatQuestionVar(question: string) {
-    return "NEAT_ASK_" + question.replace(" ", "_").toUpperCase();
+    return "NEAT_ASK_" + question.replace(/[\s-]/, "_").toUpperCase();
   }
 
   // Make sure we get an array of strings

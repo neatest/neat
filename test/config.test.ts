@@ -227,7 +227,7 @@ describe("CONFIG", () => {
           .replyWithFile(200, "examples/ask-replace-options/.neat.yml");
       })
       .stdout()
-      .do(() => cmd.run(["test"]))
+      .do(async (done) => cmd.run(["test"]).then(() => done))
       .it("runs with replace pattern and filter options", () => {
         const newTestContent = testContent.replace(
           "<!-- project_name -->",

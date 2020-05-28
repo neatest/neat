@@ -8,6 +8,7 @@ import {
   readFileSync,
   writeFileSync,
 } from "fs-extra";
+import escapeRegExp from "lodash.escaperegexp";
 import fetch from "node-fetch";
 import { promisify } from "util";
 import { ChunkType } from "./NeatConfig";
@@ -304,15 +305,17 @@ export class LocalFolder {
     filter: RegExp
   ) {
     return Promise.all(
-      files.map((file) => {
-        new Promise(() => {
-          if (filter.test(file)) {
-            const content = readFileSync(file, "utf8");
-            const newContent = this.replaceContent(content, replacements);
-            writeFileSync(file, newContent);
-          }
-        });
-      })
+      files.map(
+        async (file) =>
+          new Promise((resolve) => {
+            if (filter.test(file)) {
+              const content = readFileSync(file, "utf8");
+              const newContent = this.replaceContent(content, replacements);
+              writeFileSync(file, newContent);
+            }
+            resolve();
+          })
+      )
     );
   }
 
@@ -322,7 +325,13 @@ export class LocalFolder {
     path = "",
     filter = /.*/i
   ): string {
-    const pattern = new RegExp(Object.keys(replacements).join("|"), "ig");
+    const pattern = new RegExp(
+      Object.keys(replacements)
+        .map((v) => escapeRegExp(v))
+        .join("|"),
+      "ig"
+    );
+
     return !filter.test(path)
       ? content
       : content.replace(pattern, function (match) {

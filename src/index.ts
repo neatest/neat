@@ -205,14 +205,14 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
       }
     }
 
-    this.log(chalk.green("Your repo is ready!"));
+    this.log(chalk.green("\n\nYour repo is ready!"));
   }
 
   // Function to execute pre/post run commands
   async execCommand(command: string, folder: string, env = {}) {
     if (!existsSync(folder)) mkdirSync(folder);
     return new Promise((resolve) => {
-      cli.action.start(command);
+      cli.action.start(`Running ${chalk.grey(command)}`);
       const output = exec(
         command,
         {
@@ -225,7 +225,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
         if (output.stdout != null) output.stdout.on("data", this.log);
         if (output.stderr != null)
           output.stderr.on("data", (d) => this.log(chalk.red(d)));
-        output.on("close", () => cli.action.stop(chalk.green("✔️")));
+        output.on("close", () => cli.action.stop(chalk.green("✔️ done")));
       }
     });
   }
