@@ -5,7 +5,6 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [💾 Installation](#-installation)
 - [🔥 CLI usage](#-cli-usage)
   - [Use a "registered" repo](#use-a-registered-repo)
@@ -390,7 +389,7 @@ If you plan for other people to neat your repo, you should make sure these comma
 
 You can specify a list of files or command outputs to be "injected" into specific files.
 
-This is useful to maintain a text file that contains both sections pertaining to your repo as well as sections found in other files or commands.
+This could be used for example to ensure certain chunks of text are included in a readme, even if the local folder of a user already has a readme when he neats your repo.
 
 You can specify either a `file` or a `command` as the source.
 
@@ -405,6 +404,8 @@ inject:
 ```
 
 If the target file does not exist, it will be created.
+
+Any replacements will also be applied to each injected chunk.
 
 If you use a command as the source and plan for other people to neat your repo, you should make sure they can run on any OS, or tell otherwise in your README.
 

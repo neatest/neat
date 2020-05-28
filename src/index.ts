@@ -160,7 +160,12 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     let skippedChunks: Array<ChunkLogType> = [];
     if (neatConfig.hasChunks()) {
       [addedChunks, skippedChunks] = await local
-        .injectChunks(neatConfig.chunks, neatConfig.ignore)
+        .injectChunks(
+          neatConfig.chunks,
+          false,
+          neatConfig.replacements,
+          neatConfig.replaceFilter
+        )
         .catch(this.error);
 
       // Log added chunks to console
@@ -237,7 +242,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     let chunksToAdd: Array<ChunkLogType> = [];
     if (neatConfig.hasChunks()) {
       [chunksToAdd] = await local
-        .injectChunks(neatConfig.chunks, neatConfig.ignore, true)
+        .injectChunks(neatConfig.chunks, true)
         .catch(this.error);
     }
 

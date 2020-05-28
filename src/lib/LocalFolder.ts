@@ -146,8 +146,9 @@ export class LocalFolder {
 
   async injectChunks(
     chunks: Array<ChunkType>,
-    ignore: Array<string>,
-    preview = false
+    preview = false,
+    replacements: { [key: string]: string } = {},
+    filter = /.*/i
   ) {
     const addedChunks: Array<ChunkLogType> = [];
     const skippedChunks: Array<ChunkLogType> = [];
@@ -173,7 +174,9 @@ export class LocalFolder {
           target,
           chunk.pattern,
           this.forceInject,
-          preview
+          preview,
+          replacements,
+          filter
         )
           .then((injected) => {
             if (injected === true)
@@ -206,17 +209,31 @@ export class LocalFolder {
     target: string,
     pattern: string,
     force = false,
-    preview = false
+    preview = false,
+    replacements: { [key: string]: string },
+    filter: RegExp
   ) {
     let sourceContent;
     switch (sourceType) {
       case "url":
         sourceContent = await fetch(source).then((res) => res.text());
+        sourceContent = this.replaceContent(
+          sourceContent,
+          replacements,
+          source,
+          filter
+        );
         break;
       case "file": {
         if (!existsSync(this.dir + source))
           throw `${this.dir + source} does not exist`;
         sourceContent = readFileSync(this.dir + source, "utf8");
+        sourceContent = this.replaceContent(
+          sourceContent,
+          replacements,
+          source,
+          filter
+        );
         break;
       }
       case "command": {
@@ -286,21 +303,31 @@ export class LocalFolder {
     replacements: { [key: string]: string },
     filter: RegExp
   ) {
-    const pattern = new RegExp(Object.keys(replacements).join("|"), "ig");
-
     return Promise.all(
       files.map((file) => {
         new Promise(() => {
           if (filter.test(file)) {
             const content = readFileSync(file, "utf8");
-            const newContent = content.replace(pattern, function (match) {
-              return replacements[match];
-            });
+            const newContent = this.replaceContent(content, replacements);
             writeFileSync(file, newContent);
           }
         });
       })
     );
+  }
+
+  replaceContent(
+    content: string,
+    replacements: { [key: string]: string },
+    path = "",
+    filter = /.*/i
+  ): string {
+    const pattern = new RegExp(Object.keys(replacements).join("|"), "ig");
+    return !filter.test(path)
+      ? content
+      : content.replace(pattern, function (match) {
+          return replacements[match] ? replacements[match] : "";
+        });
   }
 
   chunkToString(chunk: ChunkLogType) {
