@@ -5,7 +5,6 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [💾 Installation](#-installation)
 - [🔥 CLI usage](#-cli-usage)
   - [Use a "registered" repo](#use-a-registered-repo)
@@ -492,6 +491,8 @@ You could use it to provide a documentation for your template in a `README.md` b
 ```yml
 ignore: [README.md]
 ```
+
+> Note: `.neat.yml` is always ignored by default, the only way not to include it is to use a [symbolic link](#symbolic-links)
 
 ### Post-run
 

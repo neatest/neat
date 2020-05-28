@@ -92,7 +92,8 @@ export class RemoteRepo {
         if (!res.tree || res.tree.length == 0)
           throw `${this.repository}@${this.branch} is empty`;
 
-        const symlinked: Array<string> = [];
+        const ignore: Array<string> = [];
+        let ignoreNeatYml = true;
         const tree = res.tree.map(
           (entry: { path: string; type: string }): TreeType => {
             let url = `${this.raw_endpoint}/${this.repository}/${this.branch}/${entry.path}`;
@@ -103,7 +104,8 @@ export class RemoteRepo {
                 const source = val[Object.keys(val)[0]];
                 if (entry.path == target) {
                   url = `${this.raw_endpoint}/${this.repository}/${this.branch}/${source}`;
-                  symlinked.push(source);
+                  ignore.push(source);
+                  if (target == ".neat.yml") ignoreNeatYml = false;
                 }
               });
             }
@@ -116,7 +118,8 @@ export class RemoteRepo {
           }
         );
 
-        return tree.filter((v: TreeType) => !symlinked.includes(v.path));
+        if (ignoreNeatYml) ignore.push(".neat.yml");
+        return tree.filter((v: TreeType) => !ignore.includes(v.path));
       });
   }
 }
