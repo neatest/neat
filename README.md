@@ -5,7 +5,6 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [💾 Installation](#-installation)
 - [🔥 CLI usage](#-cli-usage)
   - [Use a "registered" repo](#use-a-registered-repo)
@@ -488,6 +487,35 @@ inject:
     command: echo "hello world"
     target: [docs/CONTRIBUTING.md, README.md]
 ```
+
+#### Position
+
+If the pattern is not found in the target file, the injection is inserted at the end of the file by default.
+If you want to insert it in another position, you can use `before` or `after`.
+
+For example, the [hooks provided by the neat repo](https://github.com/olivr-templates/neat-repo#composability) can be used as values for before/after.
+
+This example will find `<!-- project-usage -->` and add the following just after:
+
+```md
+<!-- hello -->
+
+hello world
+
+<!-- hello -->
+```
+
+```yml
+inject:
+  - id: hello
+    command: echo "hello world"
+    target: README.md
+    after: <!-- project-usage -->
+```
+
+Note that before/after are only used when no occurence of the pattern (in this case `<!-- hello -->`) are found.
+
+If the before/after pattern is not found neither, the injection will be appended at the end of the file.
 
 #### Inject used in conjuction with ignore
 

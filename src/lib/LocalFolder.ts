@@ -178,6 +178,8 @@ export class LocalFolder {
           source,
           target,
           chunk.pattern,
+          chunk.before,
+          chunk.after,
           this.forceInject,
           preview,
           replacements,
@@ -213,6 +215,8 @@ export class LocalFolder {
     source: string,
     target: string,
     pattern: string,
+    before: string | undefined,
+    after: string | undefined,
     force = false,
     preview = false,
     replacements: { [key: string]: string },
@@ -252,14 +256,18 @@ export class LocalFolder {
 
     if (!preview) ensureFileSync(target);
 
-    const singlePatternRegex = new RegExp(pattern, "i");
-    const doublePatternRegex = new RegExp(`${pattern}[\\s\\S]*${pattern}`, "i");
+    const escapedPattern = escapeRegExp(pattern);
+    const singlePatternRegex = new RegExp(escapedPattern, "i");
+    const doublePatternRegex = new RegExp(
+      `${escapedPattern}[\\s\\S]*${escapedPattern}`,
+      "i"
+    );
     const oldTargetContent = existsSync(target)
       ? readFileSync(target, "utf8")
       : "";
 
     // Remove any existing match of the pattern in the content
-    sourceContent = sourceContent.replace(RegExp(pattern, "ig"), "");
+    sourceContent = sourceContent.replace(RegExp(escapedPattern, "ig"), "");
 
     // Add the pattern at the begining and at the end of the content
     sourceContent =
@@ -273,17 +281,36 @@ export class LocalFolder {
 
     let newTargetContent = null;
 
-    // If pattern was not found, add at the end of the file
+    // If pattern was not found
     if (
       !singlePatternRegex.test(oldTargetContent) &&
       !doublePatternRegex.test(oldTargetContent)
     ) {
-      newTargetContent =
-        oldTargetContent
-          .replace(/^(\r\n|\n|\r)+/, "")
-          .replace(/(\r\n|\n|\r)+$/, "") +
-        (/^(\r\n|\n|\r|\s)*$/.test(oldTargetContent) ? "" : "\n\n") +
-        sourceContent;
+      // before or after a pattern
+      if (before || after) {
+        const placementRegex = new RegExp(
+          escapeRegExp(before ? before : after),
+          "i"
+        );
+        if (placementRegex.test(oldTargetContent)) {
+          newTargetContent = oldTargetContent.replace(
+            placementRegex,
+            before
+              ? `${sourceContent}\n${before}`
+              : `${after}\n${sourceContent}`
+          );
+        }
+      }
+
+      // add at the end of the file
+      if (newTargetContent == null) {
+        newTargetContent =
+          oldTargetContent
+            .replace(/^(\r\n|\n|\r)+/, "")
+            .replace(/(\r\n|\n|\r)+$/, "") +
+          (/^(\r\n|\n|\r|\s)*$/.test(oldTargetContent) ? "" : "\n\n") +
+          sourceContent;
+      }
     } else if (doublePatternRegex.test(oldTargetContent)) {
       if (force == true)
         newTargetContent = oldTargetContent.replace(

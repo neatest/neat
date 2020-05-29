@@ -285,6 +285,11 @@ export class NeatConfig {
           } else chunk.file = input.file;
         } else if (input.url) chunk.url = input.url;
         else if (input.command) chunk.command = input.command;
+
+        if (input.before && typeof input.before === "string")
+          chunk.before = input.before;
+        else if (input.after && typeof input.after === "string")
+          chunk.after = input.after;
       }
     }
     return chunk;
@@ -341,4 +346,6 @@ interface TempChunkType {
   url?: string;
   command?: string;
   target: string | Array<string>;
+  before?: string;
+  after?: string;
 }

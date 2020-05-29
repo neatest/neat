@@ -393,6 +393,91 @@ describe("CONFIG", () => {
         expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
       });
 
+    test
+      .stub(cli, "anykey", () => async () => Promise.resolve())
+      .nock("https://raw.githubusercontent.com", (nock) => {
+        nock.get("/test/test/master/.neat.yml").reply(
+          200,
+          `inject:
+            - id: hello
+              command: echo "hello world"
+              target: test/test.html
+              before: "## Options"
+          `
+        );
+      })
+      .stdout()
+      .do(() => cmd.run(["test"]))
+      .it("injects when before is used", (ctx) => {
+        expect(ctx.stdout)
+          .to.contain("1 chunk(s) injected")
+          .and.to.contain("3 file(s) added");
+
+        const htmlContent = testContent.replace(
+          "## Options",
+          "<!-- hello -->\n\nhello world\n\n<!-- hello -->\n## Options"
+        );
+        expectFilesContentToMatch("./", ["test/test.md", "test/test.txt"]);
+        expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
+      });
+
+    test
+      .stub(cli, "anykey", () => async () => Promise.resolve())
+      .nock("https://raw.githubusercontent.com", (nock) => {
+        nock.get("/test/test/master/.neat.yml").reply(
+          200,
+          `inject:
+            - id: hello
+              command: echo "hello world"
+              target: test/test.html
+              after: "## Options"
+          `
+        );
+      })
+      .stdout()
+      .do(() => cmd.run(["test"]))
+      .it("injects when after is used", (ctx) => {
+        expect(ctx.stdout)
+          .to.contain("1 chunk(s) injected")
+          .and.to.contain("3 file(s) added");
+
+        const htmlContent = testContent.replace(
+          "## Options",
+          "## Options\n<!-- hello -->\n\nhello world\n\n<!-- hello -->"
+        );
+        expectFilesContentToMatch("./", ["test/test.md", "test/test.txt"]);
+        expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
+      });
+
+    test
+      .stub(cli, "anykey", () => async () => Promise.resolve())
+      .nock("https://raw.githubusercontent.com", (nock) => {
+        nock.get("/test/test/master/.neat.yml").reply(
+          200,
+          `inject:
+            - id: hello
+              command: echo "hello world"
+              target: test/test.html
+              before: "I do not exist"
+          `
+        );
+      })
+      .stdout()
+      .do(() => cmd.run(["test"]))
+      .it(
+        "injects when before or after is used but its value is not found",
+        (ctx) => {
+          expect(ctx.stdout)
+            .to.contain("1 chunk(s) injected")
+            .and.to.contain("3 file(s) added");
+
+          const htmlContent =
+            testContent + "\n\n<!-- hello -->\n\nhello world\n\n<!-- hello -->";
+          expectFilesContentToMatch("./", ["test/test.md", "test/test.txt"]);
+          expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
+        }
+      );
+
     describe("--force", () => {
       test
         .stub(cli, "anykey", () => async () => Promise.resolve())
