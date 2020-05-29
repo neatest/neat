@@ -97,18 +97,17 @@ export class RemoteRepo {
 
         const ignore: Array<string> = [];
         let ignoreNeatYml = true;
-        const tree = res.tree.map(
+
+        const tree: Array<TreeType> = res.tree.map(
           (entry: { path: string; type: string }): TreeType => {
             let url = `${this.raw_endpoint}/${this.repository}/${this.branch}/${entry.path}`;
 
+            // Replace the url for symlinks
             if (this.config && this.config.hasSymLink()) {
-              this.config.symLink.forEach((val: SymLinkType) => {
-                const target = Object.keys(val)[0];
-                const source = val[Object.keys(val)[0]];
-                if (entry.path == target) {
-                  url = `${this.raw_endpoint}/${this.repository}/${this.branch}/${source}`;
-                  ignore.push(source);
-                  if (target == ".neat.yml") ignoreNeatYml = false;
+              this.config.symLink.forEach((symlink: SymLinkType) => {
+                if (entry.path == symlink.target) {
+                  url = `${this.raw_endpoint}/${this.repository}/${this.branch}/${symlink.source}`;
+                  if (symlink.target == ".neat.yml") ignoreNeatYml = false;
                 }
               });
             }
@@ -120,6 +119,23 @@ export class RemoteRepo {
             };
           }
         );
+
+        // Add symlinks that do not exist already
+        if (this.config && this.config.hasSymLink()) {
+          this.config.symLink.forEach((symlink: SymLinkType) => {
+            ignore.push(symlink.source);
+            const matches = tree.filter(
+              (entry) => entry.path == symlink.target
+            );
+            if (matches.length == 0) {
+              tree.push({
+                path: symlink.target,
+                type: "blob",
+                url: `${this.raw_endpoint}/${this.repository}/${this.branch}/${symlink.source}`,
+              });
+            }
+          });
+        }
 
         if (ignoreNeatYml) ignore.push(".neat.yml");
         const newTree = tree.filter((v: TreeType) => !ignore.includes(v.path));

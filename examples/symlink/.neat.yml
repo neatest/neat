@@ -1,2 +1,3 @@
 symlink:
   - test/test.html: test/test.txt
+  - test/testing/other.txt: test/test.txt

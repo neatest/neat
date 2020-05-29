@@ -21,16 +21,13 @@ export class NeatConfig {
 
     debug("parsed YAML configuration", yaml);
 
+    // symlink
+    this.symLink = yaml.symlink ? this.parseArraySymLinks(yaml.symlink) : [];
+
     // pre-run
     this.preRun = yaml["pre-run"]
       ? this.parseArrayStrings(yaml["pre-run"])
       : [];
-
-    // symlink
-    this.symLink =
-      yaml.symlink && Array.isArray(yaml.symlink) && yaml.symlink.length > 0
-        ? yaml.symlink.filter(this.onlySymLinkArrayFilter)
-        : [];
 
     // pre-download
     this.preDownload = yaml["pre-download"]
@@ -145,6 +142,27 @@ export class NeatConfig {
         output = input.filter(this.onlyStringArrayFilter);
       if (typeof input === "string") output = [input];
     }
+
+    return output;
+  }
+
+  // Make sure we get an array of symlinks
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  parseArraySymLinks(input: any): Array<SymLinkType> {
+    const output: Array<SymLinkType> = [];
+    const symlinks = Array.isArray(input) ? input : [input];
+
+    symlinks.forEach((val) => {
+      if (typeof val == "object") {
+        const target = Object.keys(val)[0];
+        if (typeof val[target] == "string") {
+          output.push({
+            target: target,
+            source: val[target],
+          });
+        }
+      }
+    });
 
     return output;
   }
@@ -292,16 +310,12 @@ export class NeatConfig {
       typeof value[Object.keys(value)[0]] === "boolean"
     );
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onlySymLinkArrayFilter(value: any) {
-    return (
-      typeof value === "object" &&
-      Object.keys(value)[0] &&
-      typeof value[Object.keys(value)[0]] === "string"
-    );
-  }
 }
+
+export type SymLinkType = {
+  source: string;
+  target: string;
+};
 
 export type NeatConfigReplacementType = {
   before: string;
@@ -318,9 +332,6 @@ export type NeatConfigQuestionType = {
 
 export interface ChunkType extends TempChunkType {
   target: string;
-}
-export interface SymLinkType {
-  [k: string]: string;
 }
 
 interface TempChunkType {

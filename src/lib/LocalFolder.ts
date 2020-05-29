@@ -121,6 +121,7 @@ export class LocalFolder {
 
               return new Promise((resolve, reject) => {
                 if (!preview) {
+                  ensureFileSync(path);
                   const dest = createWriteStream(path);
                   dest
                     .on("open", function () {

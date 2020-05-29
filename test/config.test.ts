@@ -80,8 +80,12 @@ describe("CONFIG", () => {
       .stdout()
       .do(() => cmd.run(["test"]))
       .it("runs when symlinks are specified", (ctx) => {
-        expect(ctx.stdout).to.contain("2 file(s) added");
-        expectFilesContentToMatch("./", ["test/test.html", "test/test.md"]);
+        expect(ctx.stdout).to.contain("3 file(s) added");
+        expectFilesContentToMatch("./", [
+          "test/test.html",
+          "test/test.md",
+          "test/testing/other.txt",
+        ]);
       });
   });
 
