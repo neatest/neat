@@ -5,10 +5,11 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+
 - [💾 Installation](#-installation)
 - [🔥 CLI usage](#-cli-usage)
   - [Use a "registered" repo](#use-a-registered-repo)
-  - [Use any repo](#use-any-repo)
+  - [Use any GitHub repo](#use-any-github-repo)
   - [Specify a target folder](#specify-a-target-folder)
   - [Options](#options)
   - [Example use case](#example-use-case)
