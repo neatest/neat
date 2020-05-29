@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import { debug } from "./debug";
 import { NeatConfig, SymLinkType } from "./NeatConfig";
 
 export class RemoteRepo {
@@ -23,6 +24,8 @@ export class RemoteRepo {
 
     this.repository = repo;
     this.branch = (urlParts && urlParts[5]) || "master";
+
+    debug("RemoteRepo Object", this);
   }
 
   // Get repo uri of a neat repo
@@ -119,7 +122,11 @@ export class RemoteRepo {
         );
 
         if (ignoreNeatYml) ignore.push(".neat.yml");
-        return tree.filter((v: TreeType) => !ignore.includes(v.path));
+        const newTree = tree.filter((v: TreeType) => !ignore.includes(v.path));
+
+        debug("detected repository files", newTree);
+
+        return newTree;
       });
   }
 }

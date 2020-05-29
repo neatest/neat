@@ -11,6 +11,7 @@ import {
 import escapeRegExp from "lodash.escaperegexp";
 import fetch from "node-fetch";
 import { promisify } from "util";
+import { debug } from "./debug";
 import { ChunkType } from "./NeatConfig";
 import { TreeType } from "./RemoteRepo";
 
@@ -35,6 +36,8 @@ export class LocalFolder {
 
     this.only = only ? new RegExp(only, "i") : null;
     this.except = except ? new RegExp(except, "i") : null;
+
+    debug("LocalFolder Object", this);
   }
 
   getEnvVars(

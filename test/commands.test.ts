@@ -152,6 +152,16 @@ describe("COMMANDS", () => {
       .it("fails when the neat repo name is not valid");
   });
 
+  describe("neat --debug", () => {
+    test
+      .stub(cli, "anykey", () => async () => Promise.resolve())
+      .stdout()
+      .do(() => cmd.run(["test", "--debug"]))
+      .it("outputs debug information", (ctx) => {
+        expect(ctx.stdout).to.contain("Begin parsed YAML configuration");
+      });
+  });
+
   describe("neat --force", () => {
     test
       .stub(cli, "anykey", () => async () => Promise.resolve())

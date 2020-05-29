@@ -5,7 +5,6 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [💾 Installation](#-installation)
 - [🔥 CLI usage](#-cli-usage)
   - [Use a "registered" repo](#use-a-registered-repo)
@@ -83,7 +82,7 @@ By default the `master` branch is used, if you prefer another branch/tag, you ca
 neat repo@emoji
 ```
 
-### Use any repo
+### Use any GitHub repo
 
 Download files in the current working directory (without overwriting existing files):
 
@@ -96,6 +95,8 @@ By default the `master` branch is used, if you prefer another branch/tag, you ca
 ```sh
 neat your/repo@v2
 ```
+
+> Some repos may have a `.neat.yml` config file to change their behaviour when they are "neated" but this file is optional.
 
 ### Specify a target folder
 
@@ -186,6 +187,14 @@ neat repo --only "\.md$"
 
 > The regular expression is run as case insensitive.
 
+#### -d, --debug
+
+Outputs debug information to help debug something gone wrong. This is very helpful to debug a Neat config file that doesn't work as expected.
+
+```sh
+neat repo --debug
+```
+
 ### Example use case
 
 Your organization, maintains a "default" repo which contains files to be used when creating other repositories:
@@ -231,6 +240,10 @@ This is non invasive: it will not overwrite your files except for `docs/SECURITY
 Each Neat repo can contain a `.neat.yml` configuration file which specifies what to do when someone "neats" your repo.
 
 You can find configuration examples in the [examples](examples) folder
+
+We also have a [neat template](https://github.com/olivr-templates/neat-neat) to help you make your repo a neat template.
+
+> [--debug](#-d---debug) is very useful when a Neat configuration file doesn't work as expected!
 
 ### Pre-run
 

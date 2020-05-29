@@ -46,6 +46,10 @@ class Neat extends Command {
       char: "s",
       description: `Don't ask for any user input.`,
     }),
+    debug: flags.boolean({
+      char: "d",
+      description: `Used to help identify what went wrong when creating Neat config files`,
+    }),
   };
 
   static args = [
@@ -64,7 +68,9 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
 
   async run() {
     const { args, flags } = this.parse(Neat);
-    let envVars = process.env;
+
+    if (flags.debug == true) process.env["NEAT_DEBUG"] = "true";
+
     if (!args.repository) return this._help();
 
     // Get path if input was a neat repo
@@ -95,6 +101,8 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     // Preview changes and ask for confirmation
     if (flags.silent !== true)
       await this.dryRun(tree, neatConfig, local).catch(this.error);
+
+    let envVars = process.env;
 
     // Run pre-run commands
     if (neatConfig.hasPreRun()) {

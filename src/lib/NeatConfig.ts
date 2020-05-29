@@ -1,5 +1,6 @@
 import { format } from "util";
 import { parse } from "yaml";
+import { debug } from "./debug";
 
 export class NeatConfig {
   preRun: Array<string>;
@@ -13,10 +14,12 @@ export class NeatConfig {
   replaceFilter = /.*/i;
   replacements: { [key: string]: string } = {};
 
-  to_replace: Array<string> = [];
+  toReplace: Array<string> = [];
 
-  constructor(config: string, readonly base_url: string) {
+  constructor(config: string, readonly baseUrl: string) {
     const yaml = parse(config) || {};
+
+    debug("parsed YAML configuration", yaml);
 
     // pre-run
     this.preRun = yaml["pre-run"]
@@ -61,6 +64,8 @@ export class NeatConfig {
     // replacement filter
     if (yaml.replace_filter && typeof yaml.replace_filter == "string")
       this.replaceFilter = new RegExp(yaml.replace_filter, "i");
+
+    debug("NeatConfig object", this);
   }
 
   hasQuestions() {
@@ -88,12 +93,12 @@ export class NeatConfig {
   }
 
   hasReplace() {
-    return this.to_replace.length > 0 ? true : false;
+    return this.toReplace.length > 0 ? true : false;
   }
 
   addReplacementsFromAnswers(answers: { [key: string]: string }) {
     return Object.keys(answers).map((key: string) => {
-      if (this.to_replace.includes(key)) {
+      if (this.toReplace.includes(key)) {
         const answer = answers[key];
         const pattern = format(this.replacePattern, key);
         this.replacements[pattern] = Array.isArray(answer)
@@ -195,7 +200,7 @@ export class NeatConfig {
           question.message = input.description;
 
         if (input.replace && input.replace === true)
-          this.to_replace.push(input.id);
+          this.toReplace.push(input.id);
 
         if (input.default) {
           if (typeof input.default === "string")
@@ -258,7 +263,7 @@ export class NeatConfig {
             this.ignore.length > 0 &&
             (this.ignore.includes(input.file) || folderRegex.test(input.file))
           ) {
-            chunk.url = this.base_url + input.file;
+            chunk.url = this.baseUrl + input.file;
           } else chunk.file = input.file;
         } else if (input.url) chunk.url = input.url;
         else if (input.command) chunk.command = input.command;
