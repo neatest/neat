@@ -5,7 +5,6 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [💾 Installation](#-installation)
 - [🔥 CLI usage](#-cli-usage)
   - [Use a "registered" repo](#use-a-registered-repo)
@@ -238,13 +237,42 @@ This is non invasive: it will not overwrite your files except for `docs/SECURITY
 
 ## 🤘 Creating a neat repo
 
-Each Neat repo can contain a `.neat.yml` configuration file which specifies what to do when someone "neats" your repo.
+Each Neat repo can contain a `.neat.yml` configuration file which specifies what to do when someone "neats" your repo. **Please keep [composability](#a-word-on-composability) in mind when making a neat template**.
 
 You can find configuration examples in the [examples](examples) folder
 
 We also have a [neat template](https://github.com/olivr-templates/neat-neat) to help you make your repo a neat template.
 
 > [--debug](#-d---debug) is very useful when a Neat configuration file doesn't work as expected!
+
+### A word on composability
+
+In order to improve compsability between neat templates, add and make use of generic patterns and injections.
+
+Example:
+
+- The [Readme of the neat repo](https://raw.githubusercontent.com/olivr-templates/neat-repo/master/README.tpl.md) contains the pattern `<!-- project-description -->`
+- Your neat template `xyz` could have this configuration:
+
+  ```yaml
+  inject:
+    - id: project-description
+      command: echo "This is my project"
+      target: README.md
+  ```
+
+  This will have the effect of adding "This is my project" as the project's description when user runs:
+
+  ```sh
+  neat repo
+  neat xyz
+  ```
+
+  And if the pattern `<!-- project-description -->` wasn't found because, for example the user didn't run `neat repo` beforehand or has modified/is using another readme, it will just append it at the end of the user's Readme.
+
+That way, you can make micro-templates that add functionality to a repo all while keeping it neat.
+
+Check out [the patterns we're using in neat repo](https://github.com/olivr-templates/neat-repo#composability). You could make use of these or not, it's up to you!
 
 ### Pre-run
 
