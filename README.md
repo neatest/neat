@@ -5,6 +5,7 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+
 - [💾 Installation](#-installation)
 - [🔥 CLI usage](#-cli-usage)
   - [Use a "registered" repo](#use-a-registered-repo)
@@ -23,6 +24,7 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
   - [Inject files](#inject-files)
   - [Ignore files](#ignore-files)
   - [Post-run](#post-run)
+  - [A note on cross-OS compatibility](#a-note-on-cross-os-compatibility)
 - [💚 Contributing](#-contributing)
   - [Add your repo to the registered repo list](#add-your-repo-to-the-registered-repo-list)
   - [Top five ways to contribute](#top-five-ways-to-contribute)
