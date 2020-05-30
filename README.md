@@ -5,7 +5,6 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [💾 Installation](#-installation)
 - [🔥 CLI usage](#-cli-usage)
   - [Use a "registered" repo](#use-a-registered-repo)
@@ -249,32 +248,10 @@ We also have a [neat template](https://github.com/olivr-templates/neat-neat) to 
 
 ### A word on composability
 
-In order to improve compsability between neat templates, add and make use of generic patterns and injections.
+In order to improve composability between neat templates, respect these guidelines:
 
-Example:
-
-- The [Readme of the neat repo](https://raw.githubusercontent.com/olivr-templates/neat-repo/master/README.tpl.md) contains the pattern `<!-- project-description -->`
-- Your neat template `xyz` could have this configuration:
-
-  ```yaml
-  inject:
-    - id: project-description
-      command: echo "This is my project"
-      target: README.md
-  ```
-
-  This will have the effect of adding "This is my project" as the project's description when user runs:
-
-  ```sh
-  neat repo
-  neat xyz
-  ```
-
-  And if the pattern `<!-- project-description -->` wasn't found because, for example the user didn't run `neat repo` beforehand or has modified/is using another readme, it will just append it at the end of the user's Readme.
-
-That way, you can make micro-templates that add functionality to a repo all while keeping it neat.
-
-Check out [the patterns we're using in neat repo](https://github.com/olivr-templates/neat-repo#composability). You could make use of these or not, it's up to you!
+- Make use of injections and before/after hooks.
+- Choose you injection IDs/patterns wisely so that you don't overwrite another template's content. For example, if two templates both use the ID 'description', the only description remaining will be the last one that was run. A good practice is to precede all your IDs with your template name.
 
 ### Pre-run
 
@@ -438,53 +415,73 @@ This could be used for example to ensure certain chunks of text are included in 
 
 You can specify either a `file`, a `command` or an `url` as the source.
 
+This is an example config for the `xyz` template:
+
 ```yml
 inject:
-  - id: hello
+  - id: xyz-hello
     command: echo "hello world"
     target: README.md
-  - id: support
+  - id: xyz-support
     file: readme/support.md
     target: docs/CONTRIBUTING.md
-  - id: google
+  - id: xyz-google
     url: https://google.com
     target: google.html
 ```
 
 If the target file does not exist, it will be created.
 
-Any replacements will also be applied to each injected chunk (including replacement filter).
+Any [replacements](#replacements) will also be applied to each injected chunk (including replacement filter).
 
-If you use a command as the source and plan for other people to neat your repo, you should make sure they can run on any OS, or tell otherwise in your README.
+Be sure to read our note on [cross-OS compatibility](#a-note-on-cross-os-compatibility) if you plan to use a command as the source.
 
 #### Injection pattern
 
-The default pattern is `<!-- id -->` with `id` being the value of the corresponding id (like `<!-- hello -->` in the example above)
+The default pattern is `<!-- id -->` with `id` being the value of the corresponding id. For example, the id `xyz-hello` in the example above would inject:
+
+```yml
+<!-- xyz-hello -->
+
+hello world
+
+<!-- xyz-hello -->
+```
 
 Neat will find either:
 
 - Two occurences of the pattern with or without any text in between
 - One occurence of the pattern
 
-If it cannot find this pattern in the target file, Neat will add it at the bottom of the file.
+If it cannot find this pattern in the target file, Neat will add it at the bottom of the file (unless you specified a before/after pattern).
 
 You can customize the replacement pattern:
 
 ```yml
 inject:
-  - id: hello
+  - id: xyz-hello
     command: echo "hello world"
     target: README.md
     pattern: "<!-- hello-docs -->"
 ```
 
+In this example, the following will be injected in `README.md`
+
+```yml
+<!-- hello-docs -->
+
+hello world
+
+<!-- hello-docs -->
+```
+
 #### Several targets
 
-This example will find the pattern `<!-- hello -->` and replace it with `hello world` in both targets
+This example will find the pattern `<!-- xyz-hello -->` and replace it with `hello world` in both targets
 
 ```yml
 inject:
-  - id: hello
+  - id: xyz-hello
     command: echo "hello world"
     target: [docs/CONTRIBUTING.md, README.md]
 ```
@@ -492,29 +489,41 @@ inject:
 #### Position
 
 If the pattern is not found in the target file, the injection is inserted at the end of the file by default.
+
 If you want to insert it in another position, you can use `before` or `after`.
 
 For example, the [hooks provided by the neat repo](https://github.com/olivr-templates/neat-repo#composability) can be used as values for before/after.
 
-This example will find `<!-- project-usage -->` and add the following just after:
-
-```md
-<!-- hello -->
-
-hello world
-
-<!-- hello -->
-```
+This example config for the `xyz` template will find `<!-- project-usage -->` and inject just after:
 
 ```yml
 inject:
-  - id: hello
+  - id: xyz-hello
     command: echo "hello world"
     target: README.md
     after: <!-- project-usage -->
 ```
 
-Note that before/after are only used when no occurence of the pattern (in this case `<!-- hello -->`) are found.
+As a result, when a user runs:
+
+```sh
+neat repo
+neat xyz
+```
+
+The project usage part of the Readme will become:
+
+```md
+<!-- project-usage -->
+
+<!-- xyz-hello -->
+
+hello world
+
+<!-- xyz-hello -->
+```
+
+Note that before/after are only used when no occurence of the pattern (in this case `<!-- xyz-hello -->`) are found.
 
 If the before/after pattern is not found neither, the injection will be appended at the end of the file.
 
@@ -522,23 +531,19 @@ If the before/after pattern is not found neither, the injection will be appended
 
 For example, if your neat repo is using a README.md to describe what it can do and how to use it but you don't want this README.md to be downloaded when someone neats it, [you can ignore it](#ignore-files).
 
-```yml
-ignore: [README.md]
-```
-
 - Using `ignore` in conjunction with `inject`:
 
   ```yml
   ignore: [README.md]
   inject:
-    - id: hello
+    - id: xyz-hello
       command: echo "hello world"
       target: README.md
   ```
 
   As expected, `README.md` will not be downloaded. However:
 
-  - If Neat is run in a folder that doesn't contain a `README.md` already, it will create it and inject the `hello` section.
+  - If Neat is run in a folder that doesn't contain a `README.md` already, it will create it and inject the `xyz-hello` section.
   - If Neat is run in a folder that already contains a `README.md`, it will either replace or append the pattern (as described in [Injection pattern](#injection-pattern))
 
 - If the source file for the injection is ignored:
@@ -546,14 +551,14 @@ ignore: [README.md]
   ```yml
   ignore: [readme/support.md]
   inject:
-    - id: support
+    - id: xyz-support
       file: readme/support.md
       target: README.md
   ```
 
   As expected, `readme/support.md` will not be downloaded. However:
 
-  - If Neat is run in a folder that doesn't contain a `readme/support.md` already, it will inject into `README.md` the content of `readme/support.md` that is found in your neat repo.
+  - If Neat is run in a folder that doesn't contain a `readme/support.md` already, it will inject into `README.md` the content of `readme/support.md` that will be fetched remotely from your neat repo.
   - If Neat is run in a folder that already contains a `readme/support.md`, it will use that content as the content to inject into `README.md`
 
 ### Ignore files
@@ -626,6 +631,35 @@ Examples:
       - "PR template": false
       - "Issue templates": true
   ```
+
+### A note on cross-OS compatibility
+
+Because Neat is only installable via NPM, this is guaranteed each computer running it will have Node.js installed, so we recommend that any custom commands should be done in JavaScript as much as possible.
+
+You can leverage the -e flag to run JavaScript inline or call a script included in the repo. For example:
+
+```yml
+pre-run:
+  - node -e 'console.log("Hello world!")'
+post-run:
+  - node script.js
+```
+
+If using a script file, be sure to bundle any dependencies ([Webpack](https://webpack.js.org/) could help). Also, we recommend cleaning up your script by removing it from the filesystem so you don't leave any configuration artifacts behind.
+
+For example:
+
+```js
+const fs = require("fs");
+
+// Run commands
+console.log("Hello world!");
+
+// Remove this script
+fs.unlinkSync(__filename);
+```
+
+If you are running other programs or system-specific commands in your Neat configuration file, make sure to tell it in your Readme in a requirements section for example so as to not disappoint users of your template.
 
 ## 💚 Contributing
 
