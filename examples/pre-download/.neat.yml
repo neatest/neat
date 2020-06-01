@@ -1,5 +1,4 @@
 ask:
   - id: project_name
 pre-download:
-  - echo $NEAT_ASK_PROJECT_NAME
-  - script: console.log('hello' + ' script')
+  - script: console.log(process.env.NEAT_ASK_PROJECT_NAME)

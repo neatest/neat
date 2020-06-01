@@ -47,31 +47,64 @@ export class LocalFolder {
     skippedDirs: Array<string>,
     addedChunks: Array<ChunkLogType>,
     skippedChunks: Array<ChunkLogType>
-  ) {
-    return {
-      NEAT_ALL_FILES_DIRS: addedFiles
-        .concat(skippedFiles)
-        .concat(addedDirs)
-        .concat(skippedDirs)
-        .join(", "),
-      NEAT_ADDED_FILES_DIRS: addedFiles.concat(addedDirs).join(", "),
-      NEAT_SKIPPED_FILES_DIRS: skippedFiles.concat(skippedDirs).join(", "),
-      NEAT_ALL_FILES: addedFiles.concat(skippedFiles).join(", "),
-      NEAT_ADDED_FILES: addedFiles.join(", "),
-      NEAT_SKIPPED_FILES: skippedFiles.join(", "),
-      NEAT_ALL_DIRS: addedDirs.concat(skippedDirs).join(", "),
-      NEAT_ADDED_DIRS: addedDirs.join(", "),
-      NEAT_SKIPPED_DIRS: skippedDirs.join(", "),
-      NEAT_ALL_CHUNKS: addedChunks
-        .concat(skippedChunks)
-        .map(this.chunkToString)
-        .join(", "),
-      NEAT_ADDED_CHUNKS: addedChunks.map(this.chunkToString).sort().join(", "),
-      NEAT_SKIPPED_CHUNKS: skippedChunks
-        .map(this.chunkToString)
-        .sort()
-        .join(", "),
-    };
+  ): Array<{ name: string; value: string }> {
+    return [
+      {
+        name: "NEAT_ALL_FILES_DIRS",
+        value: addedFiles
+          .concat(skippedFiles)
+          .concat(addedDirs)
+          .concat(skippedDirs)
+          .join(", "),
+      },
+      {
+        name: "NEAT_ADDED_FILES_DIRS",
+        value: addedFiles.concat(addedDirs).join(", "),
+      },
+      {
+        name: "NEAT_SKIPPED_FILES_DIRS",
+        value: skippedFiles.concat(skippedDirs).join(", "),
+      },
+      {
+        name: "NEAT_ALL_FILES",
+        value: addedFiles.concat(skippedFiles).join(", "),
+      },
+      {
+        name: "NEAT_ADDED_FILES",
+        value: addedFiles.join(", "),
+      },
+      {
+        name: "NEAT_SKIPPED_FILES",
+        value: skippedFiles.join(", "),
+      },
+      {
+        name: "NEAT_ALL_DIRS",
+        value: addedDirs.concat(skippedDirs).join(", "),
+      },
+      {
+        name: "NEAT_ADDED_DIRS",
+        value: addedDirs.join(", "),
+      },
+      {
+        name: "NEAT_SKIPPED_DIRS",
+        value: skippedDirs.join(", "),
+      },
+      {
+        name: "NEAT_ALL_CHUNKS",
+        value: addedChunks
+          .concat(skippedChunks)
+          .map(this.chunkToString)
+          .join(", "),
+      },
+      {
+        name: "NEAT_ADDED_CHUNKS",
+        value: addedChunks.map(this.chunkToString).sort().join(", "),
+      },
+      {
+        name: "NEAT_SKIPPED_CHUNKS",
+        value: skippedChunks.map(this.chunkToString).sort().join(", "),
+      },
+    ];
   }
 
   // Download all files from a remote repo

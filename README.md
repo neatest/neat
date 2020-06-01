@@ -257,10 +257,17 @@ In order to improve composability between neat templates, respect these guidelin
 
 Pre-run commands are run on the local machine before any files are processed.
 
+They can be commands to be run as is on the local machine or JavaScript (using Node.js).
+
 ```yml
 pre-run:
-  - echo 'I am run at the begining, before any file is downloaded'
+  - script: console.log('I am javascript')
+  - echo 'I am ran at the begining, before any file is downloaded'
 ```
+
+The variable [fs](https://nodejs.org/api/fs.html) is available on all Javascript commands so you don't have to require the filesystem module.
+
+Javascript is always preferred because of its cross-os compatibility.
 
 If you plan for other people to neat your repo, you should make sure these commands can run on any OS, or tell otherwise in your README.
 
@@ -402,10 +409,10 @@ Pre-download commands are run on the local machine before any files are processe
 ask:
   - id: project_name
 pre-download:
-  - echo $NEAT_ASK_PROJECT_NAME
+  - script: console.log(process.env.NEAT_ASK_PROJECT_NAME)
 ```
 
-If you plan for other people to neat your repo, you should make sure these commands can run on any OS, or tell otherwise in your README.
+Just like [pre-run](#pre-run) commands, they can accept system commands or Javascript.
 
 ### Inject files
 
@@ -413,7 +420,7 @@ You can specify a list of files or command outputs to be "injected" into specifi
 
 This could be used for example to ensure certain chunks of text are included in a readme, even if the local folder of a user already has a readme when he neats your repo.
 
-You can specify either a `file`, a `command` or an `url` as the source.
+You can specify either a `file`, a `command` (system command) or an `url` as the source.
 
 This is an example config for the `xyz` template:
 
@@ -579,10 +586,10 @@ Post-run commands are run on the local machine after files are processed.
 
 ```yml
 post-run:
-  - echo 'I am run at the end'
+  - script: console.log('I am run at the end')
 ```
 
-If you plan for other people to neat your repo, you should make sure these commands can run on any OS, or tell otherwise in your README.
+Just like [pre-run](#pre-run) commands, they can accept system commands or Javascript.
 
 #### Files environment variables
 
@@ -634,14 +641,18 @@ Examples:
 
 ### A note on cross-OS compatibility
 
-Because Neat is only installable via NPM, this is guaranteed each computer running it will have Node.js installed, so we recommend that any custom commands should be done in JavaScript as much as possible.
-
-You can leverage the -e flag to run JavaScript inline or call a script included in the repo. For example:
+When running commands on the user machine, you can either use system commands or Javascript (Node.js). We recommend using Javascript as much as possible because it is the most cross-os compatible way to execute commands.
+Note that the variable fs is available so you could run filesystem commands directly.
 
 ```yml
 pre-run:
-  - node -e 'console.log("Hello world!")'
-post-run:
+  - script: console.log(fs.readFileSync('README.md', 'utf8'))
+```
+
+If your script becomes quite long, you can add it as an external script file:
+
+```yml
+pre-run:
   - node script.js
 ```
 
@@ -659,7 +670,7 @@ console.log("Hello world!");
 fs.unlinkSync(__filename);
 ```
 
-If you are running other programs or system-specific commands in your Neat configuration file, make sure to tell it in your Readme in a requirements section for example so as to not disappoint users of your template.
+If you are running other programs or system-specific commands in your Neat configuration file, make sure to tell it in your Readme in a requirements section for example so as to not disappoint other users of your template.
 
 ## 💚 Contributing
 

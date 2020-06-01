@@ -1,11 +1,14 @@
 post-run:
-  - echo 'goodbye world'
-  - echo $NEAT_ALL_FILES_DIRS
-  - echo $NEAT_ADDED_FILES_DIRS
-  - echo $NEAT_SKIPPED_FILES_DIRS
-  - echo $NEAT_ALL_FILES
-  - echo $NEAT_ADDED_FILES
-  - echo $NEAT_SKIPPED_FILES
-  - echo $NEAT_ALL_DIRS
-  - echo $NEAT_ADDED_DIRS
+  - script: |
+      console.log('multi-line' + ' script')
+      console.log(process.env.NEAT_ALL_FILES_DIRS)
+      console.log(process.env.NEAT_ADDED_FILES_DIRS)
+      console.log(process.env.NEAT_SKIPPED_FILES_DIRS)
+  - |
+    echo 'multi-line system command'
+    echo $NEAT_ALL_FILES
+    echo $NEAT_ADDED_FILES
+    echo $NEAT_SKIPPED_FILES_DIRS
+  - script: console.log(process.env.NEAT_ADDED_DIRS)
+  - echo $NEAT_ALL_DIRS | tr " " "\n"
   - echo $NEAT_SKIPPED_DIRS

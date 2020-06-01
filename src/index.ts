@@ -107,36 +107,39 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     if (flags.silent !== true)
       await this.dryRun(tree, neatConfig, local).catch(this.error);
 
-    let envVars = process.env;
-
     // Run pre-run commands
     if (neatConfig.hasPreRun()) {
       this.log("Execute pre-run commands...");
       for (const command of neatConfig.preRun) {
-        await this.execCommand(command, args.folder, envVars);
+        await this.execCommand(command, args.folder);
       }
     }
 
     // Ask questions
     if (neatConfig.hasQuestions()) {
-      const answers =
-        flags.silent === true
-          ? neatConfig.getAnswersFromEnv()
-          : ((await inquirer
-              .prompt(neatConfig.questions)
-              .catch(this.error)) as { [key: string]: string });
-
-      neatConfig.addReplacementsFromAnswers(answers);
-      const envAskVars = neatConfig.getEnvFromAnswers(answers);
-
-      envVars = { ...envVars, ...envAskVars };
+      if (flags.silent === true) {
+        neatConfig.addReplacementsFromAnswers(
+          neatConfig.getAnswersFromEnv(process.env)
+        );
+      } else
+        await inquirer
+          .prompt(neatConfig.questions)
+          .then((answers) => {
+            neatConfig.addReplacementsFromAnswers(
+              answers as { [key: string]: string }
+            );
+            neatConfig
+              .getEnvFromAnswers(answers as { [key: string]: string })
+              .forEach((env) => (process.env[env.name] = env.value));
+          })
+          .catch(this.error);
     }
 
     // Run pre-download commands
     if (neatConfig.hasPreDownload()) {
       this.log("Execute pre-download commands...");
       for (const command of neatConfig.preDownload) {
-        await this.execCommand(command, args.folder, envVars);
+        await this.execCommand(command, args.folder);
       }
     }
 
@@ -199,64 +202,25 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
 
     // Run post-run commands
     if (neatConfig.hasPostRun()) {
-      envVars = {
-        ...envVars,
-        ...local.getEnvVars(
+      local
+        .getEnvVars(
           addedFiles,
           skippedFiles,
           addedDirs,
           skippedDirs,
           addedChunks,
           skippedChunks
-        ),
-      };
+        )
+        .forEach((env) => (process.env[env.name] = env.value));
 
       this.log("Execute post-run commands...");
 
       for (const command of neatConfig.postRun) {
-        await this.execCommand(command, args.folder, envVars);
+        await this.execCommand(command, args.folder);
       }
     }
 
     this.log(chalk.green("\n\nYour repo is ready!"));
-  }
-
-  // Function to execute pre/post/pre-download run commands
-  async execCommand(
-    command: string | ScriptCommandType,
-    folder: string,
-    env = {}
-  ) {
-    if (!existsSync(folder)) mkdirSync(folder);
-
-    // If Javascript
-    if (isScriptCommandType(command)) {
-      cli.action.start(`Running script command`);
-      const evalOutput = eval(command.script);
-      this.log(evalOutput as string);
-      cli.action.stop(chalk.green("✔️ done"));
-    }
-
-    // Other commands
-    else if (isString(command)) {
-      return new Promise(async (resolve) => {
-        cli.action.start(`Running ${chalk.grey(command)}`);
-        const output = exec(
-          command,
-          {
-            env: env,
-            cwd: folder,
-          },
-          resolve
-        );
-        if (output != null) {
-          if (output.stdout != null) output.stdout.on("data", this.log);
-          if (output.stderr != null)
-            output.stderr.on("data", (d) => this.log(chalk.red(d)));
-          output.on("close", () => cli.action.stop(chalk.green("✔️ done")));
-        }
-      });
-    }
   }
 
   async dryRun(tree: TreeType[], neatConfig: NeatConfig, local: LocalFolder) {
@@ -338,6 +302,40 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
       await cli.anykey();
     }
     return true;
+  }
+
+  // Function to execute pre/post/pre-download run commands
+  async execCommand(command: string | ScriptCommandType, folder: string) {
+    if (!existsSync(folder)) mkdirSync(folder);
+
+    // If Javascript
+    if (isScriptCommandType(command)) {
+      cli.action.start(`Running script command`);
+      const evalOutput = eval("var fs = require('fs');\n" + command.script);
+      this.log(evalOutput as string);
+      cli.action.stop(chalk.green("✔️ done"));
+    }
+
+    // Other commands
+    else if (isString(command)) {
+      return new Promise(async (resolve) => {
+        cli.action.start(`Running ${chalk.grey(command)}`);
+        const output = exec(
+          command,
+          {
+            env: process.env,
+            cwd: folder,
+          },
+          resolve
+        );
+        if (output != null) {
+          if (output.stdout != null) output.stdout.on("data", this.log);
+          if (output.stderr != null)
+            output.stderr.on("data", (d) => this.log(chalk.red(d)));
+          output.on("close", () => cli.action.stop(chalk.green("✔️ done")));
+        }
+      });
+    }
   }
 }
 

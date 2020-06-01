@@ -24,6 +24,6 @@ ask:
       - "Issue templates": true
 
 post-run:
-  - echo $NEAT_ASK_PROJECT_NAME
-  - echo $NEAT_ASK_CI
+  - script: console.log(process.env.NEAT_ASK_PROJECT_NAME)
+  - script: console.log(process.env.NEAT_ASK_CI)
   - echo $NEAT_ASK_OPTIONS

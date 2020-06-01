@@ -60,7 +60,10 @@ describe("CONFIG", () => {
       .stdout()
       .do(() => cmd.run(["test"]))
       .it("runs when pre-run commands are specified", (ctx) => {
-        expect(ctx.stdout).to.contain("hello world");
+        expect(ctx.stdout).to.contain("hello command");
+        expect(ctx.stdout).to.contain("hello script");
+        expect(ctx.stdout).to.contain("hello\nmulti-line command");
+        expect(ctx.stdout).to.contain("hello\nmulti-line script");
         expectFilesContentToMatch();
       });
   });
@@ -105,7 +108,6 @@ describe("CONFIG", () => {
       .do(() => cmd.run(["test"]))
       .it("runs when pre-download commands are specified", (ctx) => {
         expect(ctx.stdout).to.contain("hello world");
-        expect(ctx.stdout).to.contain("hello script");
         expectFilesContentToMatch();
       });
   });
@@ -125,7 +127,8 @@ describe("CONFIG", () => {
       .stdout()
       .do(() => cmd.run(["test"]))
       .it("runs when post-run commands are specified", (ctx) => {
-        expect(ctx.stdout).to.contain("goodbye world");
+        expect(ctx.stdout).to.contain("multi-line script");
+        expect(ctx.stdout).to.contain("multi-line system command");
         expectFilesContentToMatch();
       });
   });
@@ -283,6 +286,7 @@ describe("CONFIG", () => {
       test
         .stub(cli, "anykey", () => async () => Promise.resolve())
         .stdout()
+        .env({}, { clear: true })
         .do(() => cmd.run(["test", "--silent"]))
         .it(
           "runs with empty answers when silent is set and no environment variables were set",

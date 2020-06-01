@@ -33,7 +33,7 @@ export class NeatConfig {
   toReplace: Array<string> = [];
 
   constructor(config: string, readonly baseUrl: string) {
-    const yaml = parse(config) || {};
+    const yaml = parse(config, { prettyErrors: true }) || {};
 
     debug("parsed YAML configuration", yaml);
 
@@ -129,11 +129,11 @@ export class NeatConfig {
     });
   }
 
-  getAnswersFromEnv() {
+  getAnswersFromEnv(env: { [k: string]: string | undefined }) {
     const answers: { [key: string]: string } = {};
 
     this.questions.forEach((question) => {
-      const envVar = process.env[this.formatQuestionVar(question.name)];
+      const envVar = env[this.formatQuestionVar(question.name)];
       answers[question.name] = envVar ? envVar : "";
     });
 
@@ -141,13 +141,13 @@ export class NeatConfig {
   }
 
   getEnvFromAnswers(answers: { [key: string]: string }) {
-    const env: { [key: string]: string } = {};
+    const env: Array<{ name: string; value: string }> = [];
 
-    Object.keys(answers).map((key: string) => {
+    Object.keys(answers).forEach((key: string) => {
       const answer = answers[key];
       const newAnswer = Array.isArray(answer) ? answer.join(", ") : answer;
       const envName = this.formatQuestionVar(key);
-      env[envName] = newAnswer;
+      env.push({ name: envName, value: newAnswer });
     });
 
     return env;

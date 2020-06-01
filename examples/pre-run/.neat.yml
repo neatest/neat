@@ -1,1 +1,9 @@
-pre-run: echo 'hello world'
+pre-run:
+  - echo 'hello command'
+  - script: console.log('hello script')
+  - |
+    echo 'hello'
+    echo 'multi-line command'
+  - script: |
+      console.log('hello')
+      console.log('multi-line script')
