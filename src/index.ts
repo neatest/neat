@@ -13,10 +13,6 @@ import {
 } from "./lib/NeatConfigTypes";
 import { RemoteRepo, TreeType } from "./lib/RemoteRepo";
 
-// ${chalk.green("✔️")}
-// ${chalk.yellow("⚠️")}
-// ${chalk.red("x")}
-
 class Neat extends Command {
   static description =
     "Download files from a remote GitHub repo to a local folder and eventually ask questions and run pre-defined commands.";
@@ -310,6 +306,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
 
     // If Javascript
     if (isScriptCommandType(command)) {
+      process.chdir(folder);
       cli.action.start(`Running script command`);
       const evalOutput = eval("var fs = require('fs');\n" + command.script);
       this.log(evalOutput as string);
