@@ -5,13 +5,24 @@ ask:
   - id: ci
     description: What is your preferred CI?
     default: [Travis, Circle CI, Github Actions]
+  - id: support_url
   - id: options
     description: What options do you want?
     default:
       - "Code Coverage": true
       - "PR template": false
       - "Issue templates": true
-  - id: support_url
+
+  # Invalid:
+  - description: Forgot to put the id so...
+    default: this question will be ignored
+  - id: wrong-choice
+    description: The format for "Code Coverage" is not right so this choice is ignored
+    default:
+      - "Code Coverage": not boolean
+      - "PR template": false
+      - "Issue templates": true
+
 post-run:
   - echo $NEAT_ASK_PROJECT_NAME
   - echo $NEAT_ASK_CI

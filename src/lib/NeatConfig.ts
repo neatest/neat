@@ -1,14 +1,30 @@
 import { format } from "util";
 import { parse } from "yaml";
 import { debug } from "./debug";
+import {
+  ChunkType,
+  isCommand,
+  isNotEmpty,
+  isString,
+  isYamlAskChoiceType,
+  isYamlAskType,
+  isYamlInjectType,
+  isYamlScriptType,
+  isYamlSymLinkType,
+  QuestionType,
+  ScriptCommandType,
+  SymLinkType,
+  YamlAskType,
+  YamlInjectType,
+} from "./NeatConfigTypes";
 
 export class NeatConfig {
-  preRun: Array<string>;
+  preRun: Array<string | ScriptCommandType>;
+  preDownload: Array<string | ScriptCommandType>;
+  postRun: Array<string | ScriptCommandType>;
   symLink: Array<SymLinkType>;
-  preDownload: Array<string>;
-  postRun: Array<string>;
   ignore: Array<string>;
-  questions: Array<NeatConfigQuestionType>;
+  questions: Array<QuestionType>;
   chunks: Array<ChunkType>;
   replacePattern = "{{%s}}";
   replaceFilter = /.*/i;
@@ -26,17 +42,17 @@ export class NeatConfig {
 
     // pre-run
     this.preRun = yaml["pre-run"]
-      ? this.parseArrayStrings(yaml["pre-run"])
+      ? this.parseArrayCommands(yaml["pre-run"])
       : [];
 
     // pre-download
     this.preDownload = yaml["pre-download"]
-      ? this.parseArrayStrings(yaml["pre-download"])
+      ? this.parseArrayCommands(yaml["pre-download"])
       : [];
 
     // post-run
     this.postRun = yaml["post-run"]
-      ? this.parseArrayStrings(yaml["post-run"])
+      ? this.parseArrayCommands(yaml["post-run"])
       : [];
 
     // ignore
@@ -55,15 +71,19 @@ export class NeatConfig {
         : [];
 
     // replacement pattern
-    if (yaml.replace_pattern && typeof yaml.replace_pattern == "string")
+    if (yaml.replace_pattern && isString(yaml.replace_pattern))
       this.replacePattern = yaml.replace_pattern;
 
     // replacement filter
-    if (yaml.replace_filter && typeof yaml.replace_filter == "string")
+    if (yaml.replace_filter && isString(yaml.replace_filter))
       this.replaceFilter = new RegExp(yaml.replace_filter, "i");
 
     debug("NeatConfig object", this);
   }
+
+  /**
+   * Checkers
+   */
 
   hasQuestions() {
     return this.questions && this.questions.length > 0 ? true : false;
@@ -93,6 +113,10 @@ export class NeatConfig {
     return this.toReplace.length > 0 ? true : false;
   }
 
+  /**
+   * Questions
+   */
+
   addReplacementsFromAnswers(answers: { [key: string]: string }) {
     return Object.keys(answers).map((key: string) => {
       if (this.toReplace.includes(key)) {
@@ -105,7 +129,7 @@ export class NeatConfig {
     });
   }
 
-  getAnswersFromVars() {
+  getAnswersFromEnv() {
     const answers: { [key: string]: string } = {};
 
     this.questions.forEach((question) => {
@@ -133,219 +157,162 @@ export class NeatConfig {
     return "NEAT_ASK_" + question.replace(/[\s-]/, "_").toUpperCase();
   }
 
-  // Make sure we get an array of strings
-  parseArrayStrings(input: string | Array<string>): Array<string> {
-    let output: Array<string> = [];
+  /**
+   * Commands (pre-run, pre-download, post-run)
+   */
 
-    if (input) {
-      if (Array.isArray(input) && input.length > 0)
-        output = input.filter(this.onlyStringArrayFilter);
-      if (typeof input === "string") output = [input];
-    }
-
-    return output;
+  // Make sure we get an array of commands
+  parseArrayCommands(input: unknown): Array<string | ScriptCommandType> {
+    const output = Array.isArray(input) ? input : [input];
+    return output.filter(isCommand).map((command) => {
+      if (isYamlScriptType(command))
+        command.toString = function () {
+          return this.script;
+        };
+      return command;
+    });
   }
+
+  /**
+   * Ignore
+   */
+
+  // Make sure we get an array of strings
+  parseArrayStrings(input: unknown): Array<string> {
+    const output = Array.isArray(input) ? input : [input];
+    return output.filter(isString);
+  }
+
+  /**
+   * Symbolic links
+   */
 
   // Make sure we get an array of symlinks
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parseArraySymLinks(input: any): Array<SymLinkType> {
-    const output: Array<SymLinkType> = [];
-    const symlinks = Array.isArray(input) ? input : [input];
+  parseArraySymLinks(input: unknown): Array<SymLinkType> {
+    const symLinks = Array.isArray(input) ? input : [input];
 
-    symlinks.forEach((val) => {
-      if (typeof val == "object") {
-        const target = Object.keys(val)[0];
-        if (typeof val[target] == "string") {
-          output.push({
-            target: target,
-            source: val[target],
-          });
-        }
-      }
+    return symLinks.filter(isYamlSymLinkType).map((symLink) => {
+      const target = Object.keys(symLink)[0];
+      return {
+        target: target,
+        source: symLink[target],
+      };
     });
+  }
+
+  /**
+   * Injections
+   */
+
+  // Make sure we get an array of chunks
+  parseArrayChunks(input: unknown): Array<ChunkType> {
+    const chunks = Array.isArray(input) ? input : [input];
+    const output: Array<ChunkType> = [];
+
+    chunks
+      .filter(isYamlInjectType)
+      .map((chunk) => this.parseChunk(chunk))
+      .filter(isNotEmpty)
+      .forEach((chunk) => {
+        if (Array.isArray(chunk.target))
+          chunk.target.forEach((target) => {
+            const newChunk = { ...chunk };
+            newChunk.target = target;
+            output.push(newChunk as ChunkType);
+          });
+        else output.push(chunk as ChunkType);
+      });
 
     return output;
   }
 
-  // Make sure we get an array of chunks
-  parseArrayChunks(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    input: Array<any>
-  ): Array<ChunkType> {
-    const parsedChunks = input
-      .map((chunk) => this.parseChunk(chunk))
-      .filter(this.notEmptyArrayFilter);
+  // Make sure we get a chunk
+  parseChunk(input: YamlInjectType): YamlInjectType | null {
+    const chunk: YamlInjectType = {
+      id: input.id,
+      target: input.target,
+    };
 
-    const chunks: Array<ChunkType> = [];
+    chunk.pattern =
+      input.pattern && typeof input.pattern === "string"
+        ? input.pattern
+        : `<!-- ${input.id} -->`;
 
-    parsedChunks.forEach((chunk) => {
-      if (Array.isArray(chunk.target))
-        chunk.target.forEach((target) => {
-          const newChunk = { ...(chunk as ChunkType) };
-          newChunk.target = target;
-          chunks.push(newChunk);
-        });
-      else chunks.push(chunk as ChunkType);
-    });
+    if (input.file && typeof input.file === "string") {
+      const folderRegex = new RegExp(
+        `^(${this.ignore.map((v) => v.replace(/\/$/, "")).join("|")})/`,
+        "i"
+      );
+      if (
+        this.ignore.length > 0 &&
+        (this.ignore.includes(input.file) || folderRegex.test(input.file))
+      ) {
+        chunk.url = this.baseUrl + input.file;
+      } else chunk.file = input.file;
+    } else if (input.url && isString(input.url)) chunk.url = input.url;
+    else if (input.command && isString(input.command))
+      chunk.command = input.command;
 
-    return chunks;
+    if (input.before && isString(input.before)) chunk.before = input.before;
+    else if (input.after && isString(input.after)) chunk.after = input.after;
+
+    return chunk;
   }
 
-  // Make sure we get an array of questions
-  parseArrayQuestions(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    input: Array<any>
-  ): Array<NeatConfigQuestionType> {
-    return input
-      .map((question) => this.parseQuestion(question))
-      .filter(this.notEmptyArrayFilter);
+  /**
+   * Questions
+   */
+
+  parseArrayQuestions(input: unknown): Array<QuestionType> {
+    const questions = Array.isArray(input) ? input : [input];
+
+    return questions
+      .filter(isYamlAskType)
+      .map((question) => this.parseQuestion(question));
   }
 
   // Make sure we get a question
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parseQuestion(input: any): NeatConfigQuestionType | null {
-    let question: NeatConfigQuestionType | null = null;
+  parseQuestion(input: YamlAskType): QuestionType {
+    const question: QuestionType = {
+      name: input.id,
+      type: "input",
+      message: input.id.replace("_", " "),
+    };
 
-    if (typeof input === "object") {
-      if (input.id) {
-        question = {
-          name: input.id,
-          type: "input",
-          message: input.id.replace("_", " "),
-        };
+    if (input.description && typeof input.description === "string")
+      question.message = input.description;
 
-        if (input.description && typeof input.description === "string")
-          question.message = input.description;
+    if (input.default) {
+      if (input.default && typeof input.default === "string")
+        question.default = () => input.default as string;
+      else if (Array.isArray(input.default)) {
+        const choices = input.default as Array<unknown>;
 
-        if (input.replace && input.replace === true)
-          this.toReplace.push(input.id);
-
-        if (input.default) {
-          if (typeof input.default === "string")
-            question.default = input.default;
-          else if (Array.isArray(input.default)) {
-            question.type = "list";
-            let choices = input.default.filter(this.onlyStringArrayFilter);
-
-            if (!choices.length) {
-              question.type = "checkbox";
-              choices = input.default
-                .filter(this.onlyChoiceArrayFilter)
-                .map((val: { [key: string]: boolean }) => {
-                  return {
-                    name: Object.keys(val)[0],
-                    checked: val[Object.keys(val)[0]],
-                  };
-                });
-            }
-            question.choices = choices;
+        const singleChoices = choices.filter(isString);
+        if (singleChoices.length > 0) {
+          question.type = "list";
+          question.choices = () => singleChoices;
+        } else {
+          const multiChoices = choices
+            .filter(isYamlAskChoiceType)
+            .map((val) => {
+              const keys = Object.keys(val);
+              const key = keys[0];
+              return {
+                name: key,
+                checked: val[key],
+              };
+            });
+          if (multiChoices.length > 0) {
+            question.type = "checkbox";
+            question.choices = () => multiChoices;
           }
         }
       }
     }
+
+    if (input.replace === true) this.toReplace.push(input.id);
+
     return question;
   }
-
-  // Make sure we get a chunk
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parseChunk(input: any): TempChunkType | null {
-    let chunk: TempChunkType | null = null;
-
-    if (typeof input === "object") {
-      if (
-        input.id &&
-        typeof input.id === "string" &&
-        input.target &&
-        (Array.isArray(input.target) || typeof input.target === "string") &&
-        ((input.file && typeof input.file === "string") ||
-          (input.url &&
-            typeof input.url === "string" &&
-            /https?:\/\//i.test(input.url)) ||
-          (input.command && typeof input.command === "string"))
-      ) {
-        chunk = {
-          id: input.id,
-          target: input.target,
-          pattern:
-            input.pattern && typeof input.pattern === "string"
-              ? input.pattern
-              : `<!-- ${input.id} -->`,
-        };
-
-        if (input.file) {
-          const folderRegex = new RegExp(
-            `^(${this.ignore.map((v) => v.replace(/\/$/, "")).join("|")})/`,
-            "i"
-          );
-          if (
-            this.ignore.length > 0 &&
-            (this.ignore.includes(input.file) || folderRegex.test(input.file))
-          ) {
-            chunk.url = this.baseUrl + input.file;
-          } else chunk.file = input.file;
-        } else if (input.url) chunk.url = input.url;
-        else if (input.command) chunk.command = input.command;
-
-        if (input.before && typeof input.before === "string")
-          chunk.before = input.before;
-        else if (input.after && typeof input.after === "string")
-          chunk.after = input.after;
-      }
-    }
-    return chunk;
-  }
-
-  notEmptyArrayFilter<TValue>(
-    value: TValue | null | undefined
-  ): value is TValue {
-    return value !== null && value !== undefined;
-  }
-
-  onlyStringArrayFilter<TValue>(
-    value: TValue | null | undefined
-  ): value is TValue {
-    return typeof value === "string" && value != "";
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onlyChoiceArrayFilter(value: any) {
-    return (
-      typeof value === "object" &&
-      Object.keys(value)[0] &&
-      typeof value[Object.keys(value)[0]] === "boolean"
-    );
-  }
-}
-
-export type SymLinkType = {
-  source: string;
-  target: string;
-};
-
-export type NeatConfigReplacementType = {
-  before: string;
-  after: string;
-};
-
-export type NeatConfigQuestionType = {
-  name: string;
-  type: "input" | "list" | "checkbox";
-  message: string;
-  default?: () => string;
-  choices?: () => Array<string> | Array<{ name: string; checked: boolean }>;
-};
-
-export interface ChunkType extends TempChunkType {
-  target: string;
-}
-
-interface TempChunkType {
-  id: string;
-  pattern: string;
-  file?: string;
-  url?: string;
-  command?: string;
-  target: string | Array<string>;
-  before?: string;
-  after?: string;
 }

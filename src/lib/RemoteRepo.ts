@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import { debug } from "./debug";
-import { NeatConfig, SymLinkType } from "./NeatConfig";
+import { NeatConfig } from "./NeatConfig";
+import { SymLinkType } from "./NeatConfigTypes";
 
 export class RemoteRepo {
   protected static neat_repos =

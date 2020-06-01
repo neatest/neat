@@ -12,7 +12,7 @@ import escapeRegExp from "lodash.escaperegexp";
 import fetch from "node-fetch";
 import { promisify } from "util";
 import { debug } from "./debug";
-import { ChunkType } from "./NeatConfig";
+import { ChunkType } from "./NeatConfigTypes";
 import { TreeType } from "./RemoteRepo";
 
 const exec = promisify(syncExec);
@@ -170,7 +170,7 @@ export class LocalFolder {
         } else if (chunk.command) {
           sourceType = "command";
           source = chunk.command;
-        } else throw "Unknown chunk type";
+        } else throw "Invalid chunk type";
 
         const target = this.dir + chunk.target;
         return await this.injectChunk(

@@ -1,3 +1,7 @@
 symlink:
   - test/test.html: test/test.txt
   - test/testing/other.txt: test/test.txt
+
+  - notgood:
+      - this is not a good format
+      - and will be ignored

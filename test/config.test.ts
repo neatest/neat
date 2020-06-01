@@ -105,6 +105,7 @@ describe("CONFIG", () => {
       .do(() => cmd.run(["test"]))
       .it("runs when pre-download commands are specified", (ctx) => {
         expect(ctx.stdout).to.contain("hello world");
+        expect(ctx.stdout).to.contain("hello script");
         expectFilesContentToMatch();
       });
   });

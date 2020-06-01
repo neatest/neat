@@ -157,6 +157,9 @@ describe("COMMANDS", () => {
       .stub(cli, "anykey", () => async () => Promise.resolve())
       .stdout()
       .do(() => cmd.run(["test", "--debug"]))
+      .do(() => {
+        process.env["NEAT_DEBUG"] = undefined;
+      })
       .it("outputs debug information", (ctx) => {
         expect(ctx.stdout).to.contain("Begin parsed YAML configuration");
       });

@@ -6,6 +6,11 @@ import { existsSync, mkdirSync } from "fs-extra";
 import inquirer from "inquirer";
 import { ChunkLogType, LocalFolder } from "./lib/LocalFolder";
 import { NeatConfig } from "./lib/NeatConfig";
+import {
+  isScriptCommandType,
+  isString,
+  ScriptCommandType,
+} from "./lib/NeatConfigTypes";
 import { RemoteRepo, TreeType } from "./lib/RemoteRepo";
 
 // ${chalk.green("✔️")}
@@ -116,7 +121,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     if (neatConfig.hasQuestions()) {
       const answers =
         flags.silent === true
-          ? neatConfig.getAnswersFromVars()
+          ? neatConfig.getAnswersFromEnv()
           : ((await inquirer
               .prompt(neatConfig.questions)
               .catch(this.error)) as { [key: string]: string });
@@ -216,26 +221,42 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     this.log(chalk.green("\n\nYour repo is ready!"));
   }
 
-  // Function to execute pre/post run commands
-  async execCommand(command: string, folder: string, env = {}) {
+  // Function to execute pre/post/pre-download run commands
+  async execCommand(
+    command: string | ScriptCommandType,
+    folder: string,
+    env = {}
+  ) {
     if (!existsSync(folder)) mkdirSync(folder);
-    return new Promise((resolve) => {
-      cli.action.start(`Running ${chalk.grey(command)}`);
-      const output = exec(
-        command,
-        {
-          env: env,
-          cwd: folder,
-        },
-        resolve
-      );
-      if (output != null) {
-        if (output.stdout != null) output.stdout.on("data", this.log);
-        if (output.stderr != null)
-          output.stderr.on("data", (d) => this.log(chalk.red(d)));
-        output.on("close", () => cli.action.stop(chalk.green("✔️ done")));
-      }
-    });
+
+    // If Javascript
+    if (isScriptCommandType(command)) {
+      cli.action.start(`Running script command`);
+      const evalOutput = eval(command.script);
+      this.log(evalOutput as string);
+      cli.action.stop(chalk.green("✔️ done"));
+    }
+
+    // Other commands
+    else if (isString(command)) {
+      return new Promise(async (resolve) => {
+        cli.action.start(`Running ${chalk.grey(command)}`);
+        const output = exec(
+          command,
+          {
+            env: env,
+            cwd: folder,
+          },
+          resolve
+        );
+        if (output != null) {
+          if (output.stdout != null) output.stdout.on("data", this.log);
+          if (output.stderr != null)
+            output.stderr.on("data", (d) => this.log(chalk.red(d)));
+          output.on("close", () => cli.action.stop(chalk.green("✔️ done")));
+        }
+      });
+    }
   }
 
   async dryRun(tree: TreeType[], neatConfig: NeatConfig, local: LocalFolder) {
