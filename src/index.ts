@@ -119,7 +119,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
         );
       } else
         await inquirer
-          .prompt(neatConfig.questions)
+          .prompt(neatConfig.getQuestions())
           .then((answers) => {
             neatConfig.addReplacementsFromAnswers(
               answers as { [key: string]: string }

@@ -114,50 +114,6 @@ export class NeatConfig {
   }
 
   /**
-   * Questions
-   */
-
-  addReplacementsFromAnswers(answers: { [key: string]: string }) {
-    return Object.keys(answers).map((key: string) => {
-      if (this.toReplace.includes(key)) {
-        const answer = answers[key];
-        const pattern = format(this.replacePattern, key);
-        this.replacements[pattern] = Array.isArray(answer)
-          ? answer.join(", ")
-          : answer;
-      }
-    });
-  }
-
-  getAnswersFromEnv(env: { [k: string]: string | undefined }) {
-    const answers: { [key: string]: string } = {};
-
-    this.questions.forEach((question) => {
-      const envVar = env[this.formatQuestionVar(question.name)];
-      answers[question.name] = envVar ? envVar : "";
-    });
-
-    return answers;
-  }
-
-  getEnvFromAnswers(answers: { [key: string]: string }) {
-    const env: Array<{ name: string; value: string }> = [];
-
-    Object.keys(answers).forEach((key: string) => {
-      const answer = answers[key];
-      const newAnswer = Array.isArray(answer) ? answer.join(", ") : answer;
-      const envName = this.formatQuestionVar(key);
-      env.push({ name: envName, value: newAnswer });
-    });
-
-    return env;
-  }
-
-  formatQuestionVar(question: string) {
-    return "NEAT_ASK_" + question.replace(/[\s-]/, "_").toUpperCase();
-  }
-
-  /**
    * Commands (pre-run, pre-download, post-run)
    */
 
@@ -314,5 +270,53 @@ export class NeatConfig {
     if (input.replace === true) this.toReplace.push(input.id);
 
     return question;
+  }
+
+  getQuestions() {
+    return this.questions.map((q) => {
+      const envVar = process.env[this.formatQuestionVar(q.name)];
+      if (envVar && q.type === "input") q.default = () => envVar;
+      return q;
+    });
+  }
+
+  addReplacementsFromAnswers(answers: { [key: string]: string }) {
+    return Object.keys(answers).map((key: string) => {
+      if (this.toReplace.includes(key)) {
+        const answer = answers[key];
+        const pattern = format(this.replacePattern, key);
+        this.replacements[pattern] = Array.isArray(answer)
+          ? answer.join(", ")
+          : answer;
+      }
+    });
+  }
+
+  getAnswersFromEnv(env: { [k: string]: string | undefined }) {
+    const answers: { [key: string]: string } = {};
+
+    this.questions.forEach((question) => {
+      const envVar = env[this.formatQuestionVar(question.name)];
+      answers[question.name] = envVar ? envVar : "";
+    });
+
+    return answers;
+  }
+
+  getEnvFromAnswers(answers: { [key: string]: string }) {
+    const env: Array<{ name: string; value: string }> = [];
+
+    Object.keys(answers).forEach((key: string) => {
+      const answer = answers[key];
+      const newAnswer = Array.isArray(answer) ? answer.join(", ") : answer;
+      const envName = this.formatQuestionVar(key);
+      env.push({ name: envName, value: newAnswer });
+    });
+
+    return env;
+  }
+
+  formatQuestionVar(question: string) {
+    return "NEAT_ASK_" + question.replace(/[\s-]/, "_").toUpperCase();
   }
 }
