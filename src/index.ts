@@ -306,9 +306,11 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
 
     // If Javascript
     if (isScriptCommandType(command)) {
-      process.chdir(folder);
       cli.action.start(`Running script command`);
-      const evalOutput = eval("var fs = require('fs');\n" + command.script);
+      const currentFolder = process.cwd();
+      process.chdir(folder);
+      const evalOutput = eval(`var fs = require('fs');\n ${command.script}`);
+      process.chdir(currentFolder);
       this.log(evalOutput as string);
       cli.action.stop(chalk.green("✔️ done"));
     }
