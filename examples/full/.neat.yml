@@ -1,7 +1,8 @@
 symlink:
   - README.md: readme-content.md
 
-pre-run: echo 'hello world'
+pre-run:
+  script: console.log('hello pre-run')
 
 ignore: [README.md]
 
@@ -21,13 +22,11 @@ ask:
       - "PR template": false
       - "Issue templates": true
   - id: support_url
-    replace: true
 
 replace_pattern: "{{%s}}"
 replace_filter: \.(md|txt)$
 
-pre-download:
-  - echo $NEAT_ASK_PROJECT_NAME
+pre-download: echo $NEAT_ASK_PROJECT_NAME
 
 inject:
   - id: support
@@ -42,16 +41,20 @@ inject:
     target: google.html
 
 post-run:
-  - echo $NEAT_ASK_PROJECT_NAME
-  - echo $NEAT_ASK_CI
-  - echo $NEAT_ASK_OPTIONS
-  - echo $NEAT_ASK_SUPPORT_URL
-  - echo $NEAT_ALL_FILES_DIRS | tr " " "\n"
-  - echo $NEAT_ADDED_FILES_DIRS
-  - echo $NEAT_SKIPPED_FILES_DIRS
-  - echo $NEAT_ALL_FILES
-  - echo $NEAT_ADDED_FILES
-  - echo $NEAT_SKIPPED_FILES
-  - echo $NEAT_ALL_DIRS
-  - echo $NEAT_ADDED_DIRS
+  - script: |
+      console.log('multi-line script')
+      console.log(process.env.NEAT_ASK_PROJECT_NAME)
+      console.log(process.env.NEAT_ASK_CI)
+      console.log(process.env.NEAT_ASK_OPTIONS)
+      console.log(process.env.NEAT_ASK_SUPPORT_URL)
+      console.log(process.env.NEAT_ALL_FILES_DIRS)
+      console.log(process.env.NEAT_ADDED_FILES_DIRS)
+      console.log(process.env.NEAT_SKIPPED_FILES_DIRS)
+  - |
+    echo 'multi-line system command'
+    echo $NEAT_ALL_FILES
+    echo $NEAT_ADDED_FILES
+    echo $NEAT_SKIPPED_FILES_DIRS
+  - script: console.log(process.env.NEAT_ADDED_DIRS)
+  - echo $NEAT_ALL_DIRS | tr " " "\n"
   - echo $NEAT_SKIPPED_DIRS

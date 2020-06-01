@@ -62,8 +62,8 @@ describe("CONFIG", () => {
       .it("runs when pre-run commands are specified", (ctx) => {
         expect(ctx.stdout).to.contain("hello command");
         expect(ctx.stdout).to.contain("hello script");
-        expect(ctx.stdout).to.contain("hello\nmulti-line command");
-        expect(ctx.stdout).to.contain("hello\nmulti-line script");
+        expect(ctx.stdout).to.contain("multi-line command");
+        expect(ctx.stdout).to.contain("multi-line script");
         expectFilesContentToMatch();
       });
   });
