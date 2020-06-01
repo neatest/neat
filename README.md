@@ -24,7 +24,6 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
   - [Inject files](#inject-files)
   - [Ignore files](#ignore-files)
   - [Post-run](#post-run)
-  - [A note on cross-OS compatibility](#a-note-on-cross-os-compatibility)
 - [💚 Contributing](#-contributing)
   - [Add your repo to the registered repo list](#add-your-repo-to-the-registered-repo-list)
   - [Top five ways to contribute](#top-five-ways-to-contribute)
