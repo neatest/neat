@@ -179,6 +179,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
         .injectChunks(
           neatConfig.chunks,
           false,
+          addedFiles,
           neatConfig.replacements,
           neatConfig.replaceFilter
         )
@@ -238,7 +239,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     let chunksUnknown: Array<ChunkLogType> = [];
     if (neatConfig.hasChunks()) {
       const injections = await local
-        .injectChunks(neatConfig.chunks, true)
+        .injectChunks(neatConfig.chunks, true, filesToAdd)
         .catch(this.error);
       chunksToAdd = injections.addedChunks;
       chunksUnknown = injections.unknownChunks;

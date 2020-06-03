@@ -185,6 +185,7 @@ export class LocalFolder {
   async injectChunks(
     chunks: Array<ChunkType>,
     preview = false,
+    onlyFiles: Array<string> | null = null,
     replacements: { [key: string]: string } = {},
     filter = /.*/i
   ) {
@@ -202,7 +203,17 @@ export class LocalFolder {
           target: chunk.target,
           source: source,
         });
-      else
+      else if (
+        !this.forceInject &&
+        existsSync(chunk.target) &&
+        onlyFiles != null &&
+        !onlyFiles.includes(chunk.target)
+      ) {
+        skippedChunks.push({
+          target: chunk.target,
+          source: source,
+        });
+      } else
         await this.injectChunk(chunk, preview, replacements, filter)
           .then((injected) => {
             if (injected === true)

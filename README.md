@@ -126,13 +126,15 @@ neat repo --force-download
 
 #### --force-inject
 
-The default behaviour is to skip injecting local files that have already been injected (ie. if the target file contains two occurences of the injection pattern)
+The default behaviour is to skip injecting local files that existed already before running Neat.
 
-Using this flag will force re-injecting those files.
+Using this flag will force injecting those files.
 
 ```sh
 neat repo --force-inject
 ```
+
+This flag is quite commonly used, its default behavior is a safety measure to prevent modification of existing files and is inline with the philosophy of Neat not being invasive on an existing repo unless specifically told.
 
 #### -f, --force
 

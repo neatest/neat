@@ -2,7 +2,12 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { expect, test } from "@oclif/test";
 import { cli } from "cli-ux";
-import { existsSync, removeSync } from "fs-extra";
+import {
+  ensureFileSync,
+  existsSync,
+  removeSync,
+  writeFileSync,
+} from "fs-extra";
 import nock from "nock";
 import { expectFilesContentToMatch, testContent } from "./testHelpers";
 
@@ -304,6 +309,60 @@ describe("INJECT", () => {
         expectFilesContentToMatch("./", ["test/test.txt"], txtContent);
         expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
       });
+
+    describe("--force", () => {
+      test
+        .stub(cli, "anykey", () => async () => Promise.resolve())
+        .nock("https://raw.githubusercontent.com", (nock) => {
+          nock.get("/test/test/master/.neat.yml").reply(
+            200,
+            `inject:
+            - id: hello
+              command: echo "hello world"
+              target: test/test.html
+              pattern: "<!-- other -->"`
+          );
+        })
+        .stdout()
+        .do(() => ensureFileSync("test/test.html"))
+        .do(() => cmd.run(["test", "--force-inject"]))
+        .it(
+          "injects when no pattern is found & file existed before & force is set",
+          (ctx) => {
+            expect(ctx.stdout).to.contain("1 chunk(s) injected");
+            expectFilesContentToMatch("./", ["test/test.txt", "test/test.md"]);
+            expectFilesContentToMatch(
+              "./",
+              ["test/test.html"],
+              "<!-- other -->\n\nhello world\n\n<!-- other -->"
+            );
+          }
+        );
+      test
+        .stub(cli, "anykey", () => async () => Promise.resolve())
+        .nock("https://raw.githubusercontent.com", (nock) => {
+          nock.get("/test/test/master/.neat.yml").reply(
+            200,
+            `inject:
+            - id: hello
+              command: echo "hello world"
+              target: test/test.html
+              pattern: "<!-- other -->"`
+          );
+        })
+        .stdout()
+        .do(() => ensureFileSync("test/test.html"))
+        .do(() => cmd.run(["test"]))
+        .it(
+          "doesn't inject when no pattern is found & file existed before & force is not set",
+          (ctx) => {
+            expect(ctx.stdout).to.contain("0 chunk(s) injected");
+            expectFilesContentToMatch("./", ["test/test.txt", "test/test.md"]);
+            expectFilesContentToMatch("./", ["test/test.html"], "");
+          }
+        );
+    });
+
     describe("before/after", () => {
       test
         .stub(cli, "anykey", () => async () => Promise.resolve())
@@ -499,6 +558,72 @@ describe("INJECT", () => {
         expectFilesContentToMatch("./", ["test/test.md", "test/test.txt"]);
         expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
       });
+
+    describe("--force", () => {
+      test
+        .stub(cli, "anykey", () => async () => Promise.resolve())
+        .nock("https://raw.githubusercontent.com", (nock) => {
+          nock.get("/test/test/master/.neat.yml").reply(
+            200,
+            `inject:
+            - id: hello
+              command: echo "hello world"
+              target: test/test.html
+              pattern: "<!-- project_name -->"`
+          );
+        })
+        .stdout()
+        .do(() => {
+          writeFileSync("test/test.html", "<!-- project_name -->");
+        })
+        .do(() => cmd.run(["test", "--force-inject"]))
+        .it("injects when a single pattern is found & force is set", (ctx) => {
+          expect(ctx.stdout)
+            .to.contain("1 chunk(s) injected")
+            .and.to.contain("2 file(s) added");
+
+          expectFilesContentToMatch("./", ["test/test.md", "test/test.txt"]);
+          expectFilesContentToMatch(
+            "./",
+            ["test/test.html"],
+            "<!-- project_name -->\n\nhello world\n\n<!-- project_name -->"
+          );
+        });
+
+      test
+        .stub(cli, "anykey", () => async () => Promise.resolve())
+        .nock("https://raw.githubusercontent.com", (nock) => {
+          nock.get("/test/test/master/.neat.yml").reply(
+            200,
+            `inject:
+            - id: hello
+              command: echo "hello world"
+              target: test/test.html
+              pattern: "<!-- project_name -->"`
+          );
+        })
+        .stdout()
+        .do(() => {
+          writeFileSync("test/test.html", "<!-- project_name -->");
+        })
+        .do(() => cmd.run(["test"]))
+        .it(
+          "doesn't inject when a single pattern is found & force is not set",
+          (ctx) => {
+            expect(ctx.stdout)
+              .to.contain("0 chunk(s) injected")
+              .and.to.contain("2 file(s) added");
+
+            expectFilesContentToMatch("./", ["test/test.md", "test/test.txt"]);
+            expectFilesContentToMatch(
+              "./",
+              ["test/test.html"],
+              "<!-- project_name -->"
+            );
+          }
+        );
+    });
+
     describe("if/ifnot", () => {
       test
         .stub(cli, "anykey", () => async () => Promise.resolve())
@@ -675,6 +800,43 @@ describe("INJECT", () => {
             expectFilesContentToMatch("./", ["test/test.md"], mdContent);
             expectFilesContentToMatch("./", ["test/test.txt"], txtContent);
             expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
+          }
+        );
+
+      test
+        .stub(cli, "anykey", () => async () => Promise.resolve())
+        .nock("https://raw.githubusercontent.com", (nock) => {
+          nock.get("/test/test/master/.neat.yml").reply(
+            200,
+            `inject:
+            - id: hello
+              command: echo "hello world"
+              target: test/test.html
+              pattern: "<!-- project_name -->"`
+          );
+        })
+        .stdout()
+        .do(() =>
+          writeFileSync(
+            "test/test.html",
+            "<!-- project_name -->test<!-- project_name -->"
+          )
+        )
+        .stdout()
+        .do(() => cmd.run(["test"]))
+        .it(
+          "doesn't inject when a double pattern is found & force is not set",
+          (ctx) => {
+            expect(ctx.stdout)
+              .to.contain("0 chunk(s) injected")
+              .and.to.contain("2 file(s) added");
+
+            expectFilesContentToMatch("./", ["test/test.md", "test/test.txt"]);
+            expectFilesContentToMatch(
+              "./",
+              ["test/test.html"],
+              "<!-- project_name -->test<!-- project_name -->"
+            );
           }
         );
     });
