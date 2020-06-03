@@ -1,7 +1,7 @@
 {
   "name": "neat",
   "description": "Neat is a CLI tool and a collection of the neatest repository templates to improve your repos.",
-  "version": "2.0.6",
+  "version": "2.1.0",
   "author": "Romain Barissat @incorrupt",
   "bin": {
     "neat": "./bin/run"
