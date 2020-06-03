@@ -4,6 +4,7 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [💾 Installation](#-installation)
@@ -645,6 +646,58 @@ hello world
 Note that before/after are only used when no occurence of the pattern (in this case `<!-- xyz-hello -->`) are found.
 
 If the before/after pattern is not found neither, the injection will be appended at the end of the file.
+
+#### Wrap
+
+The default behaviour is to wrap the injected content with the pattern. You can change this by specifying the wrap option.
+
+For example, the following produces the same result as omitting the wrap option (default behaviour)
+
+```yml
+inject:
+  - id: xyz-hello
+    command: echo "hello world"
+    target: README.md
+    wrap: [before, after]
+```
+
+```md
+<!-- xyz-hello -->
+
+hello world
+
+<!-- xyz-hello -->
+```
+
+The following only adds the pattern before
+
+```yml
+inject:
+  - id: xyz-hello
+    command: echo "hello world"
+    target: README.md
+    wrap: before
+```
+
+```md
+<!-- xyz-hello -->
+
+hello world
+```
+
+The following adds no pattern before or after
+
+```yml
+inject:
+  - id: xyz-hello
+    command: echo "hello world"
+    target: README.md
+    wrap: false
+```
+
+```md
+hello world
+```
 
 #### Inject used in conjuction with ignore
 

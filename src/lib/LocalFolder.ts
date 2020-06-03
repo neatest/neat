@@ -189,6 +189,7 @@ export class LocalFolder {
     replacements: { [key: string]: string } = {},
     filter = /.*/i
   ) {
+    const canInjectFiles = onlyFiles == null ? [] : [...onlyFiles];
     const addedChunks: Array<ChunkLogType> = [];
     const skippedChunks: Array<ChunkLogType> = [];
     const unknownChunks: Array<ChunkLogType> = [];
@@ -206,16 +207,16 @@ export class LocalFolder {
       else if (
         !this.forceInject &&
         existsSync(chunk.target) &&
-        onlyFiles != null &&
-        !onlyFiles.includes(chunk.target)
+        canInjectFiles != null &&
+        !canInjectFiles.includes(chunk.target)
       ) {
         skippedChunks.push({
           target: chunk.target,
           source: source,
         });
       } else {
-        if (!existsSync(chunk.target) && onlyFiles != null)
-          onlyFiles.push(chunk.target);
+        if (!existsSync(chunk.target) && canInjectFiles != null)
+          canInjectFiles.push(chunk.target);
         await this.injectChunk(chunk, preview, replacements, filter)
           .then((injected) => {
             if (injected === true)
@@ -295,14 +296,13 @@ export class LocalFolder {
     sourceContent = sourceContent.replace(RegExp(escapedPattern, "ig"), "");
 
     // Add the pattern at the begining and at the end of the content
-    sourceContent =
-      chunk.pattern +
-      "\n\n" +
-      sourceContent
-        .replace(/^(\r\n|\n|\r)+/, "")
-        .replace(/(\r\n|\n|\r)+$/, "") +
-      "\n\n" +
-      chunk.pattern;
+    sourceContent = `${
+      chunk.wrap.includes("before") ? chunk.pattern + "\n\n" : ""
+    }${sourceContent
+      .replace(/^(\r\n|\n|\r)+/, "")
+      .replace(/(\r\n|\n|\r)+$/, "")}${
+      chunk.wrap.includes("after") ? "\n\n" + chunk.pattern : ""
+    }`;
 
     let newTargetContent = null;
 

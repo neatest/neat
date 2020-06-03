@@ -105,6 +105,142 @@ describe("INJECT", () => {
       expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
     });
 
+  describe("wrap", () => {
+    test
+      .stub(cli, "anykey", () => async () => Promise.resolve())
+      .nock("https://raw.githubusercontent.com", (nock) => {
+        nock.get("/test/test/master/.neat.yml").reply(
+          200,
+          `
+          inject:
+            - id: support
+              file: test/test.md
+              target: test/test.html
+              pattern: "<!-- auto-support -->"
+              wrap: before
+          `
+        );
+      })
+      .stdout()
+      .do(() => cmd.run(["test"]))
+      .it(
+        "add pattern before the injected content when wrap is before",
+        (ctx) => {
+          expect(ctx.stdout).to.contain("1 chunk(s) injected");
+          const htmlContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}`;
+          expectFilesContentToMatch("./", ["test/test.txt", "test/test.md"]);
+          expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
+        }
+      );
+
+    test
+      .stub(cli, "anykey", () => async () => Promise.resolve())
+      .nock("https://raw.githubusercontent.com", (nock) => {
+        nock.get("/test/test/master/.neat.yml").reply(
+          200,
+          `
+          inject:
+            - id: support
+              file: test/test.md
+              target: test/test.html
+              pattern: "<!-- auto-support -->"
+              wrap: [after]
+          `
+        );
+      })
+      .stdout()
+      .do(() => cmd.run(["test"]))
+      .it(
+        "add pattern after the injected content when wrap is after",
+        (ctx) => {
+          expect(ctx.stdout).to.contain("1 chunk(s) injected");
+          const htmlContent = `${testContent}\n\n${testContent}\n\n<!-- auto-support -->`;
+          expectFilesContentToMatch("./", ["test/test.txt", "test/test.md"]);
+          expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
+        }
+      );
+    test
+      .stub(cli, "anykey", () => async () => Promise.resolve())
+      .nock("https://raw.githubusercontent.com", (nock) => {
+        nock.get("/test/test/master/.neat.yml").reply(
+          200,
+          `
+          inject:
+            - id: support
+              file: test/test.md
+              target: test/test.html
+              pattern: "<!-- auto-support -->"
+              wrap: [before, after]
+          `
+        );
+      })
+      .stdout()
+      .do(() => cmd.run(["test"]))
+      .it(
+        "add pattern before and after the injected content when wrap is before and after",
+        (ctx) => {
+          expect(ctx.stdout).to.contain("1 chunk(s) injected");
+          const htmlContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}\n\n<!-- auto-support -->`;
+          expectFilesContentToMatch("./", ["test/test.txt", "test/test.md"]);
+          expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
+        }
+      );
+
+    test
+      .stub(cli, "anykey", () => async () => Promise.resolve())
+      .nock("https://raw.githubusercontent.com", (nock) => {
+        nock.get("/test/test/master/.neat.yml").reply(
+          200,
+          `
+          inject:
+            - id: support
+              file: test/test.md
+              target: test/test.html
+              pattern: "<!-- auto-support -->"
+              wrap: false
+          `
+        );
+      })
+      .stdout()
+      .do(() => cmd.run(["test"]))
+      .it(
+        "don't wrap the injected content with any pattern when wrap is false",
+        (ctx) => {
+          expect(ctx.stdout).to.contain("1 chunk(s) injected");
+          const htmlContent = `${testContent}\n\n${testContent}`;
+          expectFilesContentToMatch("./", ["test/test.txt", "test/test.md"]);
+          expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
+        }
+      );
+
+    test
+      .stub(cli, "anykey", () => async () => Promise.resolve())
+      .nock("https://raw.githubusercontent.com", (nock) => {
+        nock.get("/test/test/master/.neat.yml").reply(
+          200,
+          `
+          inject:
+            - id: support
+              file: test/test.md
+              target: test/test.html
+              pattern: "<!-- auto-support -->"
+              wrap: []
+          `
+        );
+      })
+      .stdout()
+      .do(() => cmd.run(["test"]))
+      .it(
+        "don't wrap the injected content with any pattern when wrap is empty",
+        (ctx) => {
+          expect(ctx.stdout).to.contain("1 chunk(s) injected");
+          const htmlContent = `${testContent}\n\n${testContent}`;
+          expectFilesContentToMatch("./", ["test/test.txt", "test/test.md"]);
+          expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
+        }
+      );
+  });
+
   /**
    * No file
    */

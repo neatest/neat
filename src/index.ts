@@ -335,6 +335,9 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
       config.chunks.forEach((chunk) => {
         this.log(`\n  - id: ${chalk.green(chunk.id)}`);
         this.log(`    if: [${chalk.green(chunk.if.join(", "))}]`);
+        chunk.wrap.length
+          ? this.log(`    wrap: [${chalk.green(chunk.wrap.join(", "))}]`)
+          : this.log(`    wrap: ${chalk.green("false")}`);
         if (chunk.command) this.log(`    command: ${chalk.red(chunk.command)}`);
 
         const stringprops: Array<

@@ -216,22 +216,43 @@ export class NeatConfig {
     else if (input.after) chunk.after = input.after;
 
     // If / if not
-    const matchTypes: Array<
+    const ifTypes: Array<
       "no-file" | "no-pattern" | "single-pattern" | "double-pattern"
     > = ["no-file", "no-pattern", "single-pattern", "double-pattern"];
 
-    if (
-      (input.if && typeof input.if === "string") ||
-      (Array.isArray(input.if) && input.if.length > 0)
-    )
-      chunk.if = Array.isArray(input.if) ? input.if : [input.if];
+    if (input.if && typeof input.if === "string" && ifTypes.includes(input.if))
+      chunk.if = [input.if];
+    else if (Array.isArray(input.if) && input.if.length > 0)
+      chunk.if = input.if.filter((i) => ifTypes.includes(i));
     else if (
-      (input.ifnot && typeof input.ifnot === "string") ||
-      (Array.isArray(input.ifnot) && input.ifnot.length > 0)
+      input.ifnot &&
+      typeof input.ifnot === "string" &&
+      ifTypes.includes(input.ifnot)
     ) {
-      const ifnot = Array.isArray(input.ifnot) ? input.ifnot : [input.ifnot];
-      chunk.if = matchTypes.filter((v) => !ifnot.includes(v));
-    } else chunk.if = matchTypes;
+      const ifnot = [input.ifnot];
+      chunk.if = ifTypes.filter((v) => !ifnot.includes(v));
+    } else if (Array.isArray(input.ifnot) && input.ifnot.length > 0) {
+      const ifnot = input.ifnot.filter((i) => ifTypes.includes(i));
+      chunk.if = ifTypes.filter((v) => !ifnot.includes(v));
+    } else chunk.if = ifTypes;
+
+    // Wrap
+    const wrapTypes: Array<"before" | "after"> = ["before", "after"];
+
+    if (
+      input.wrap &&
+      typeof input.wrap === "string" &&
+      wrapTypes.includes(input.wrap)
+    )
+      chunk.wrap = [input.wrap];
+    else if (Array.isArray(input.wrap) && input.wrap.length > 0)
+      chunk.wrap = input.wrap.filter((w) => wrapTypes.includes(w));
+    else if (
+      (Array.isArray(input.wrap) && input.wrap.length === 0) ||
+      input.wrap === false
+    )
+      chunk.wrap = [];
+    else chunk.wrap = wrapTypes;
 
     return chunk;
   }
