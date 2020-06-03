@@ -281,7 +281,11 @@ neat inspect ./localrepo
 
 The path must start with "." to be recognized as a local path.
 
-When your Neat repo doesn't work as expected, you can use the [--debug](#-d---debug) command if `inspect` is not of enough help.
+When your Neat repo doesn't work as expected, you can use the [--debug](#-d---debug) command if `inspect` is not of enough help, however you have to push your repo to GitHub first.
+
+```sh
+neat your/repo --debug
+```
 
 Note that `inspect` is meant to help final users to inspect a repo. Commands are always highlighted in red and scripts in yellow, so the colors DO NOT indicate errors in your configuration.
 
