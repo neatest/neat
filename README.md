@@ -4,6 +4,7 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [💾 Installation](#-installation)
@@ -493,6 +494,69 @@ inject:
   - id: xyz-hello
     command: echo "hello world"
     target: [docs/CONTRIBUTING.md, README.md]
+```
+
+#### if and if not
+
+You can tweak what you inject based on these conditional parameters:
+
+- the target file does **not** exist (`no-file`)
+- the file exists and **no** occurence of the pattern is found (`no-pattern`)
+- the file exists and **one** occurence of the pattern is found (`single-pattern`)
+- the file exists and **two** occurences of the pattern are found (`double-pattern`)
+
+You can include an `if` or `ifnot` declaration per injection. If both are specified, `ifnot` is ignored.
+The if/ifnot declaration can either be one conditional parameter or an array of them.
+If if/ifnot are not specified, it is the same as adding all of the conditional parameters in if `if: [no-file, no-pattern, single-pattern, double-pattern]`
+
+The example below will inject the content of Google.com in the file `search.html` only if the `search.html` file doesn't exist.
+If `search.html` exists already, it will inject the content of Bing.com
+
+```yml
+inject:
+  - id: google
+    if: no-file
+    url: https://google.com
+    target: search.html
+    pattern: "<!-- search-engine -->"
+  - id: bing
+    ifnot: [no-file]
+    url: https://bing.com
+    target: search.html
+    pattern: "<!-- search-engine -->"
+```
+
+This other example will produce exactly the same result:
+
+```yml
+inject:
+  - id: google
+    ifnot: [no-pattern, single-pattern, double-pattern]
+    url: https://google.com
+    target: search.html
+    pattern: "<!-- search-engine -->"
+  - id: bing
+    if: [no-pattern, single-pattern, double-pattern]
+    url: https://bing.com
+    target: search.html
+    pattern: "<!-- search-engine -->"
+```
+
+The example below will inject the content of Google.com in the file `search.html` only if the `search.html` file doesn't exist, otherwise it will inject the content of Bing.com except if `search.html` already includes two occurences of the pattern.
+So, essentially, no injection will happen if a double pattern is found.
+
+```yml
+inject:
+  - id: google
+    if: no-file
+    url: https://google.com
+    target: search.html
+    pattern: "<!-- search-engine -->"
+  - id: bing
+    if: [no-pattern, single-pattern]
+    url: https://bing.com
+    target: search.html
+    pattern: "<!-- search-engine -->"
 ```
 
 #### Position

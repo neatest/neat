@@ -37,8 +37,13 @@ inject:
     command: echo "hello world"
     target: [hello.txt, hello.md]
   - id: google
+    if: no-file
     url: https://google.com
-    target: google.html
+    target: search.html
+  - id: bing
+    ifnot: no-file
+    url: https://bing.com
+    target: search.html
 
 post-run:
   - script: |

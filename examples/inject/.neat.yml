@@ -4,7 +4,7 @@ inject:
     target: test/test.md
     pattern: "<!-- auto-support -->"
   - id: hello
-    command: echo "hello world"
+    command: echo 'hello world'
     target: test/test.txt
   - id: test
     url: https://test.com/content.html

@@ -52,7 +52,7 @@ export class RemoteRepo {
 
   // Get config object
   public async getConfig(): Promise<NeatConfig> {
-    if (this.config == null) this.config = await this.fetchNeatConfig();
+    if (this.config === null) this.config = await this.fetchNeatConfig();
     return this.config;
   }
 
@@ -93,7 +93,7 @@ export class RemoteRepo {
         else throw res.statusText;
       })
       .then((res) => {
-        if (!res.tree || res.tree.length == 0)
+        if (!res.tree || res.tree.length === 0)
           throw `${this.repository}@${this.branch} is empty`;
 
         const ignore: Array<string> = [];
@@ -106,16 +106,16 @@ export class RemoteRepo {
             // Replace the url for symlinks
             if (this.config && this.config.hasSymLink()) {
               this.config.symLink.forEach((symlink: SymLinkType) => {
-                if (entry.path == symlink.target) {
+                if (entry.path === symlink.target) {
                   url = `${this.raw_endpoint}/${this.repository}/${this.branch}/${symlink.source}`;
-                  if (symlink.target == ".neat.yml") ignoreNeatYml = false;
+                  if (symlink.target === ".neat.yml") ignoreNeatYml = false;
                 }
               });
             }
 
             return {
               path: entry.path,
-              type: entry.type == "tree" ? "tree" : "blob",
+              type: entry.type === "tree" ? "tree" : "blob",
               url: url,
             };
           }
@@ -126,9 +126,9 @@ export class RemoteRepo {
           this.config.symLink.forEach((symlink: SymLinkType) => {
             ignore.push(symlink.source);
             const matches = tree.filter(
-              (entry) => entry.path == symlink.target
+              (entry) => entry.path === symlink.target
             );
-            if (matches.length == 0) {
+            if (matches.length === 0) {
               tree.push({
                 path: symlink.target,
                 type: "blob",

@@ -189,28 +189,49 @@ export class NeatConfig {
       target: input.target,
     };
 
+    // Pattern
     chunk.pattern =
       input.pattern && typeof input.pattern === "string"
         ? input.pattern
         : `<!-- ${input.id} -->`;
 
-    if (input.file && typeof input.file === "string") {
+    // Injection type
+    // file
+    if (input.file) {
       const folderRegex = new RegExp(
         `^(${this.ignore.map((v) => v.replace(/\/$/, "")).join("|")})/`,
         "i"
       );
-      if (
-        this.ignore.length > 0 &&
-        (this.ignore.includes(input.file) || folderRegex.test(input.file))
-      ) {
+      if (this.ignore.includes(input.file) || folderRegex.test(input.file))
         chunk.url = this.baseUrl + input.file;
-      } else chunk.file = input.file;
-    } else if (input.url && isString(input.url)) chunk.url = input.url;
-    else if (input.command && isString(input.command))
-      chunk.command = input.command;
+      else chunk.file = input.file;
+    }
+    // url
+    else if (input.url && isString(input.url)) chunk.url = input.url;
+    // command
+    else if (input.command) chunk.command = input.command;
 
-    if (input.before && isString(input.before)) chunk.before = input.before;
-    else if (input.after && isString(input.after)) chunk.after = input.after;
+    // Before / after
+    if (input.before) chunk.before = input.before;
+    else if (input.after) chunk.after = input.after;
+
+    // If / if not
+    const matchTypes: Array<
+      "no-file" | "no-pattern" | "single-pattern" | "double-pattern"
+    > = ["no-file", "no-pattern", "single-pattern", "double-pattern"];
+
+    if (
+      (input.if && typeof input.if === "string") ||
+      (Array.isArray(input.if) && input.if.length > 0)
+    )
+      chunk.if = input.if;
+    else if (
+      (input.ifnot && typeof input.ifnot === "string") ||
+      (Array.isArray(input.ifnot) && input.ifnot.length > 0)
+    ) {
+      const ifnot = Array.isArray(input.ifnot) ? input.ifnot : [input.ifnot];
+      chunk.if = matchTypes.filter((v) => !ifnot.includes(v));
+    } else chunk.if = matchTypes;
 
     return chunk;
   }

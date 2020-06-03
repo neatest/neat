@@ -61,10 +61,12 @@ describe("COMMANDS", () => {
       });
 
     const folder = "test/testing/";
+    const initialFolder = process.cwd();
     test
       .stub(cli, "anykey", () => async () => Promise.resolve())
       .stdout()
       .do(() => cmd.run(["test", folder]))
+      .do(() => process.chdir(initialFolder))
       .it("runs with a folder argument", (ctx) => {
         expect(ctx.stdout).to.contain("3 file(s) added");
         expectFilesContentToMatch(folder);

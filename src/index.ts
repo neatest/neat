@@ -63,16 +63,20 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     {
       name: "folder",
       description: "Target folder. If it doesn't exist, it will be created.",
-      default: "./",
     },
   ];
 
   async run() {
     const { args, flags } = this.parse(Neat);
 
-    if (flags.debug == true) process.env["NEAT_DEBUG"] = "true";
+    if (flags.debug === true) process.env["NEAT_DEBUG"] = "true";
 
     if (!args.repository) return this._help();
+
+    if (args.folder) {
+      if (!existsSync(args.folder)) mkdirSync(args.folder);
+      process.chdir(args.folder);
+    }
 
     // Get path if input was a neat repo
     const repository = args.repository.includes("/")
@@ -89,7 +93,6 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
 
     // Initialize local folder
     const local = new LocalFolder(
-      args.folder,
       flags.force ? true : flags["force-download"],
       flags.force ? true : flags["force-inject"],
       flags.only,
@@ -107,7 +110,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     if (neatConfig.hasPreRun()) {
       this.log("Execute pre-run commands...");
       for (const command of neatConfig.preRun) {
-        await this.execCommand(command, args.folder);
+        await this.execCommand(command);
       }
     }
 
@@ -135,7 +138,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     if (neatConfig.hasPreDownload()) {
       this.log("Execute pre-download commands...");
       for (const command of neatConfig.preDownload) {
-        await this.execCommand(command, args.folder);
+        await this.execCommand(command);
       }
     }
 
@@ -170,8 +173,9 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     // Inject files
     let addedChunks: Array<ChunkLogType> = [];
     let skippedChunks: Array<ChunkLogType> = [];
+
     if (neatConfig.hasChunks()) {
-      [addedChunks, skippedChunks] = await local
+      const injections = await local
         .injectChunks(
           neatConfig.chunks,
           false,
@@ -179,6 +183,8 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
           neatConfig.replaceFilter
         )
         .catch(this.error);
+      addedChunks = injections.addedChunks;
+      skippedChunks = injections.skippedChunks;
 
       // Log added chunks to console
       this.log(`${chalk.green("✔️")} ${addedChunks.length} chunk(s) injected:`);
@@ -212,7 +218,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
       this.log("Execute post-run commands...");
 
       for (const command of neatConfig.postRun) {
-        await this.execCommand(command, args.folder);
+        await this.execCommand(command);
       }
     }
 
@@ -229,10 +235,13 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
 
     // Get chunks that will be injected
     let chunksToAdd: Array<ChunkLogType> = [];
+    let chunksUnknown: Array<ChunkLogType> = [];
     if (neatConfig.hasChunks()) {
-      [chunksToAdd] = await local
+      const injections = await local
         .injectChunks(neatConfig.chunks, true)
         .catch(this.error);
+      chunksToAdd = injections.addedChunks;
+      chunksUnknown = injections.unknownChunks;
     }
 
     // If nothing to do, skip any user input
@@ -240,6 +249,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
       !neatConfig.preRun.length &&
       !filesToAdd.length &&
       !chunksToAdd.length &&
+      !chunksUnknown.length &&
       !neatConfig.postRun.length
     ) {
       return false;
@@ -283,16 +293,28 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
       if (filesToAdd.length) this.log(chalk.grey(filesToAdd.join("\n")));
 
       // Preview chunks to add
-      if (neatConfig.hasChunks())
+      if (neatConfig.hasChunks()) {
         this.log(
           `${chalk.yellow("⚠️")} ${chalk.bold(
             chunksToAdd.length
           )} chunk(s) will be injected:`
         );
-      if (chunksToAdd.length)
-        this.log(
-          chalk.grey(chunksToAdd.map(local.chunkToString).sort().join("\n"))
-        );
+        if (chunksToAdd.length)
+          this.log(
+            chalk.grey(chunksToAdd.map(local.chunkToString).sort().join("\n"))
+          );
+
+        if (chunksUnknown.length) {
+          this.log(
+            `${chalk.yellow("⚠️")} ${chalk.bold(
+              chunksUnknown.length
+            )} chunk(s) will be known after apply:`
+          );
+          this.log(
+            chalk.grey(chunksUnknown.map(local.chunkToString).sort().join("\n"))
+          );
+        }
+      }
 
       // Ask for confirmation to proceed
       await cli.anykey();
@@ -301,16 +323,11 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
   }
 
   // Function to execute pre/post/pre-download run commands
-  async execCommand(command: string | ScriptCommandType, folder: string) {
-    if (!existsSync(folder)) mkdirSync(folder);
-
+  async execCommand(command: string | ScriptCommandType) {
     // If Javascript
     if (isScriptCommandType(command)) {
       cli.action.start(`Running script command`);
-      const currentFolder = process.cwd();
-      process.chdir(folder);
       const evalOutput = eval(`var fs = require('fs');\n ${command.script}`);
-      process.chdir(currentFolder);
       this.log(evalOutput as string);
       cli.action.stop(chalk.green("✔️ done"));
     }
@@ -319,14 +336,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     else if (isString(command)) {
       return new Promise(async (resolve) => {
         cli.action.start(`Running ${chalk.grey(command)}`);
-        const output = exec(
-          command,
-          {
-            env: process.env,
-            cwd: folder,
-          },
-          resolve
-        );
+        const output = exec(command, { env: process.env }, resolve);
         if (output != null) {
           if (output.stdout != null) output.stdout.on("data", this.log);
           if (output.stderr != null)

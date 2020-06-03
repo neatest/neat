@@ -5,6 +5,7 @@
 export interface ChunkType extends YamlInjectType {
   target: string;
   pattern: string;
+  if: Array<"no-file" | "no-pattern" | "single-pattern" | "double-pattern">;
 }
 
 export interface SymLinkType {
@@ -119,6 +120,8 @@ export interface YamlInjectType {
   command?: string;
   before?: string;
   after?: string;
+  if?: Array<"no-file" | "no-pattern" | "single-pattern" | "double-pattern">;
+  ifnot?: Array<"no-file" | "no-pattern" | "single-pattern" | "double-pattern">;
 }
 
 export function isYamlInjectType(input: unknown): input is YamlInjectType {
@@ -132,7 +135,8 @@ export function isYamlInjectType(input: unknown): input is YamlInjectType {
       (obj.url &&
         typeof obj.url === "string" &&
         /https?:\/\//i.test(obj.url)) ||
-      (obj.command && typeof obj.command === "string"))
+      (obj.command &&
+        (typeof obj.command === "string" || isScriptCommandType(obj.command))))
   ) {
     return true;
   }

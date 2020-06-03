@@ -1,5 +1,9 @@
 import { expect } from "@oclif/test";
+import { cli } from "cli-ux";
 import { existsSync, readFileSync } from "fs-extra";
+import { stub } from "sinon";
+
+stub(cli.action, "start");
 
 export const testContent = `# {{project_name}}
 Welcome to <!-- project_name -->

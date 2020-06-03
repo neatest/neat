@@ -23,16 +23,16 @@ export class LocalFolder {
   except: RegExp | null;
 
   constructor(
-    folder = ".",
     readonly forceDownload = false,
     readonly forceInject = false,
     only: string | undefined = undefined,
-    except: string | undefined = undefined
+    except: string | undefined = undefined,
+    folder = ""
   ) {
     // https://regexr.com/54vr1
     const dir = folder.replace(/((?<!^\.|^\.\.|^)\/$|^\.$)/, "");
     // https://regexr.com/54vr7
-    this.dir = /^\.*\//.test(dir) ? dir : `./${dir}/`;
+    this.dir = dir ? (/^\.*\//.test(dir) ? dir : `./${dir}/`) : "./";
 
     this.only = only ? new RegExp(only, "i") : null;
     this.except = except ? new RegExp(except, "i") : null;
@@ -124,7 +124,7 @@ export class LocalFolder {
     // Create directories
     await Promise.all(
       tree
-        .filter((v) => this.onlyAllowedDirsArrayFilter(v, ignore))
+        .filter((v) => this.isAllowedDir(v, ignore))
         .map((file) => {
           const path = `${this.dir}${file.path}`;
           if (!existsSync(path)) {
@@ -137,12 +137,12 @@ export class LocalFolder {
     // Download files
     await Promise.all(
       tree
-        .filter((v) => this.onlyAllowedFilesArrayFilter(v, ignore))
+        .filter((v) => this.isAllowedFile(v, ignore))
         .map((file) => {
           const path = `${this.dir}${file.path}`;
 
           // Don't overwrite if not forcing
-          if (existsSync(path) && this.forceDownload == false) {
+          if (existsSync(path) && this.forceDownload === false) {
             skippedFiles.push(path);
             Promise.resolve();
           }
@@ -190,113 +190,91 @@ export class LocalFolder {
   ) {
     const addedChunks: Array<ChunkLogType> = [];
     const skippedChunks: Array<ChunkLogType> = [];
+    const unknownChunks: Array<ChunkLogType> = [];
 
-    await Promise.all(
-      chunks.map(async (chunk) => {
-        let sourceType: string, source: string;
-        if (chunk.file) {
-          sourceType = "file";
-          source = chunk.file;
-        } else if (chunk.url) {
-          sourceType = "url";
-          source = chunk.url;
-        } else if (chunk.command) {
-          sourceType = "command";
-          source = chunk.command;
-        } else throw "Invalid chunk type";
+    for (const originalChunk of chunks) {
+      const chunk = { ...originalChunk };
+      chunk.target = this.dir + chunk.target;
+      const source = (chunk.file || chunk.url || chunk.command) as string;
 
-        const target = this.dir + chunk.target;
-        return await this.injectChunk(
-          sourceType as "url" | "file" | "command",
-          source,
-          target,
-          chunk.pattern,
-          chunk.before,
-          chunk.after,
-          this.forceInject,
-          preview,
-          replacements,
-          filter
-        )
+      if (preview === true && chunk.command)
+        unknownChunks.push({
+          target: chunk.target,
+          source: source,
+        });
+      else
+        await this.injectChunk(chunk, preview, replacements, filter)
           .then((injected) => {
             if (injected === true)
               addedChunks.push({
-                target: target,
+                target: chunk.target,
                 source: source,
               });
             else
               skippedChunks.push({
-                target: target,
+                target: chunk.target,
                 source: source,
               });
           })
           .catch((err) => {
             skippedChunks.push({
-              target: target,
+              target: chunk.target,
               source: source,
               error: err,
             });
           });
-      })
-    );
+    }
 
-    return [addedChunks, skippedChunks];
+    return {
+      addedChunks: addedChunks,
+      skippedChunks: skippedChunks,
+      unknownChunks: unknownChunks,
+    };
   }
 
   async injectChunk(
-    sourceType: "url" | "file" | "command",
-    source: string,
-    target: string,
-    pattern: string,
-    before: string | undefined,
-    after: string | undefined,
-    force = false,
+    chunk: ChunkType,
     preview = false,
     replacements: { [key: string]: string },
     filter: RegExp
   ) {
-    let sourceContent;
-    switch (sourceType) {
-      case "url":
-        sourceContent = await fetch(source).then((res) => res.text());
-        sourceContent = this.replaceContent(
-          sourceContent,
-          replacements,
-          source,
-          filter
-        );
-        break;
-      case "file": {
-        if (!existsSync(this.dir + source))
-          throw `${this.dir + source} does not exist`;
-        sourceContent = readFileSync(this.dir + source, "utf8");
-        sourceContent = this.replaceContent(
-          sourceContent,
-          replacements,
-          source,
-          filter
-        );
-        break;
-      }
-      case "command": {
-        const { stdout, stderr } = await exec(source);
-        // eslint-disable-next-line no-console
-        if (stderr) throw stderr;
-        sourceContent = stdout;
-        break;
-      }
+    let sourceContent = "";
+
+    if (chunk.file) {
+      if (!existsSync(this.dir + chunk.file))
+        throw `${this.dir + chunk.file} does not exist`;
+      sourceContent = readFileSync(this.dir + chunk.file, "utf8");
+      sourceContent = this.replaceContent(
+        sourceContent,
+        replacements,
+        chunk.file,
+        filter
+      );
+    } else if (chunk.url) {
+      sourceContent = await fetch(chunk.url).then((res) => res.text());
+      sourceContent = this.replaceContent(
+        sourceContent,
+        replacements,
+        chunk.url,
+        filter
+      );
+    } else if (chunk.command) {
+      const { stdout, stderr } = await exec(chunk.command);
+      if (stderr) throw stderr;
+      sourceContent = stdout;
     }
 
-    if (!preview) ensureFileSync(target);
+    if (!existsSync(chunk.target) && !chunk.if.includes("no-file"))
+      return false;
 
-    const escapedPattern = escapeRegExp(pattern);
+    const escapedPattern = escapeRegExp(chunk.pattern);
     const singlePatternRegex = new RegExp(escapedPattern, "i");
     const doublePatternRegex = new RegExp(
       `${escapedPattern}[\\s\\S]*${escapedPattern}`,
       "i"
     );
-    const oldTargetContent = existsSync(target)
-      ? readFileSync(target, "utf8")
+    const oldTargetContent = existsSync(chunk.target)
+      ? readFileSync(chunk.target, "utf8")
       : "";
 
     // Remove any existing match of the pattern in the content
@@ -304,39 +282,46 @@ export class LocalFolder {
 
     // Add the pattern at the begining and at the end of the content
     sourceContent =
-      pattern +
+      chunk.pattern +
       "\n\n" +
       sourceContent
         .replace(/^(\r\n|\n|\r)+/, "")
         .replace(/(\r\n|\n|\r)+$/, "") +
       "\n\n" +
-      pattern;
+      chunk.pattern;
 
     let newTargetContent = null;
 
+    // If file was not found
+    if (!existsSync(chunk.target) && chunk.if.includes("no-file")) {
+      newTargetContent = sourceContent;
+      if (!preview) ensureFileSync(chunk.target);
+    }
+
     // If pattern was not found
-    if (
+    else if (
       !singlePatternRegex.test(oldTargetContent) &&
-      !doublePatternRegex.test(oldTargetContent)
+      !doublePatternRegex.test(oldTargetContent) &&
+      chunk.if.includes("no-pattern")
     ) {
-      // before or after a pattern
-      if (before || after) {
+      if (chunk.before || chunk.after) {
+        // before or after a pattern
         const placementRegex = new RegExp(
-          escapeRegExp(before ? before : after),
+          escapeRegExp(chunk.before ? chunk.before : chunk.after),
           "i"
         );
         if (placementRegex.test(oldTargetContent)) {
           newTargetContent = oldTargetContent.replace(
             placementRegex,
-            before
-              ? `${sourceContent}\n${before}`
-              : `${after}\n${sourceContent}`
+            chunk.before
+              ? `${sourceContent}\n${chunk.before}`
+              : `${chunk.after}\n${sourceContent}`
           );
         }
       }
 
-      // add at the end of the file
-      if (newTargetContent == null) {
+      // add at the end of the file if no before/after or if before/after pattern not found
+      if (newTargetContent === null) {
         newTargetContent =
           oldTargetContent
             .replace(/^(\r\n|\n|\r)+/, "")
@@ -344,23 +329,31 @@ export class LocalFolder {
           (/^(\r\n|\n|\r|\s)*$/.test(oldTargetContent) ? "" : "\n\n") +
           sourceContent;
       }
-    } else if (doublePatternRegex.test(oldTargetContent)) {
-      if (force == true)
+    }
+    // double pattern
+    else if (doublePatternRegex.test(oldTargetContent)) {
+      if (chunk.if.includes("double-pattern") && this.forceInject === true)
         newTargetContent = oldTargetContent.replace(
           doublePatternRegex,
           sourceContent
         );
-    } else if (singlePatternRegex.test(oldTargetContent)) {
+    }
+    // single pattern
+    else if (
+      singlePatternRegex.test(oldTargetContent) &&
+      chunk.if.includes("single-pattern")
+    ) {
       newTargetContent = oldTargetContent.replace(
         singlePatternRegex,
         sourceContent
       );
     }
 
-    if (newTargetContent) {
-      if (!preview) writeFileSync(target, newTargetContent);
+    if (newTargetContent === null) return false;
+    else {
+      if (!preview) writeFileSync(chunk.target, newTargetContent);
       return true;
-    } else return false;
+    }
   }
 
   async replaceFiles(
@@ -409,31 +402,27 @@ export class LocalFolder {
     return msg;
   }
 
-  onlyAllowedDirsArrayFilter(
+  isAllowedDir(
     value: {
       path: string;
       type: string;
     },
     ignore: Array<string> = []
   ): boolean {
-    return value.type == "tree"
-      ? this.onlyAllowedArrayFilter(value.path, ignore)
-      : false;
+    return value.type === "tree" ? this.isAllowed(value.path, ignore) : false;
   }
 
-  onlyAllowedFilesArrayFilter(
+  isAllowedFile(
     value: {
       path: string;
       type: string;
     },
     ignore: Array<string> = []
   ): boolean {
-    return value.type == "blob"
-      ? this.onlyAllowedArrayFilter(value.path, ignore)
-      : false;
+    return value.type === "blob" ? this.isAllowed(value.path, ignore) : false;
   }
 
-  onlyAllowedArrayFilter(path: string, ignore: Array<string>): boolean {
+  isAllowed(path: string, ignore: Array<string>): boolean {
     const folderRegex = new RegExp(
       `^(${ignore.map((v) => v.replace(/\/$/, "")).join("|")})/`,
       "i"
