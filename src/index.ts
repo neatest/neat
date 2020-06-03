@@ -392,9 +392,11 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
       // Preview pre-run commands
       if (neatConfig.hasPreRun()) {
         this.log(
-          `${chalk.yellow("⚠️")} ${chalk.bold(
-            neatConfig.preRun.length
-          )} command(s) will be run before processing:`
+          chalk.yellow(
+            `⚠️ ${chalk.bold(
+              neatConfig.preRun.length
+            )} command(s) will be run before processing:`
+          )
         );
         neatConfig.preRun.map((command) => this.log(chalk.grey(command)));
       }
@@ -402,9 +404,11 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
       // Preview pre-download commands
       if (neatConfig.hasPreDownload()) {
         this.log(
-          `${chalk.yellow("⚠️")} ${chalk.bold(
-            neatConfig.preDownload.length
-          )} command(s) will be run before downloading files:`
+          chalk.yellow(
+            `⚠️ ${chalk.bold(
+              neatConfig.preDownload.length
+            )} command(s) will be run before downloading files:`
+          )
         );
         neatConfig.preDownload.map((command) => this.log(chalk.grey(command)));
       }
@@ -412,9 +416,11 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
       // Preview post-run commands
       if (neatConfig.hasPostRun()) {
         this.log(
-          `${chalk.yellow("⚠️")} ${chalk.bold(
-            neatConfig.postRun.length
-          )} command(s) will be run after processing:`
+          chalk.yellow(
+            `⚠️ ${chalk.bold(
+              neatConfig.postRun.length
+            )} command(s) will be run after processing:`
+          )
         );
         neatConfig.postRun.map((command) => this.log(chalk.grey(command)));
       }
