@@ -4,6 +4,7 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [💾 Installation](#-installation)
@@ -56,12 +57,21 @@ Install with:
 - Or use directly with NPX
 
   ```sh
-  npx neat repo
+  npx neat
   ```
 
 ## 🔥 CLI usage
 
-Essentially what Neat does is download files from a remote GitHub repo to a local folder and eventually ask questions and run pre-defined commands that would be specified in a `.neat.yml` at the root of the remote repo.
+Neat is very powerful, as it allows you to enhance existing repos or create new repos by:
+
+- downloading files
+- asking questions
+- replacing strings with other strings, files or command outputs
+- running pre-defined commands or scripts
+
+The default behaviour is to just download files, but Neat repos can specify a `.neat.yml` which can virtually do anything when a user "neats" a repo.
+
+Neat is safe to run in an existing directory because it will **never change existing files** unless you use the [force flags](#--force-download). That said, always inspect the `.neat.yml` configuration file before neating a repo because it could run commands that could be harmful to your system.
 
 There is a collection of neat repos in [neat-repos.json](neat-repos.json) (See [contributing](#contributing) if you want to submit yours).
 Although we look at the repo at the time of adding it to the list, we cannot vouch for any changes committed after that.
@@ -502,9 +512,9 @@ inject:
 You can tweak what you inject based on these conditional parameters:
 
 - the target file does **not** exist (`no-file`)
-- the file exists and **no** occurence of the pattern is found (`no-pattern`)
-- the file exists and **one** occurence of the pattern is found (`single-pattern`)
-- the file exists and **two** occurences of the pattern are found (`double-pattern`)
+- the target file exists and **no** occurence of the pattern is found (`no-pattern`)
+- the target file exists and **one** occurence of the pattern is found (`single-pattern`)
+- the target file exists and **two** occurences of the pattern are found (`double-pattern`)
 
 You can include an `if` or `ifnot` declaration per injection. If both are specified, `ifnot` is ignored.
 The if/ifnot declaration can either be one conditional parameter or an array of them.
