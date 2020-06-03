@@ -213,7 +213,9 @@ export class LocalFolder {
           target: chunk.target,
           source: source,
         });
-      } else
+      } else {
+        if (!existsSync(chunk.target) && onlyFiles != null)
+          onlyFiles.push(chunk.target);
         await this.injectChunk(chunk, preview, replacements, filter)
           .then((injected) => {
             if (injected === true)
@@ -234,6 +236,7 @@ export class LocalFolder {
               error: err,
             });
           });
+      }
     }
 
     return {
