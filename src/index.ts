@@ -371,7 +371,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
 
   async dryRun(tree: TreeType[], neatConfig: NeatConfig, local: LocalFolder) {
     // Get files that will be downloaded
-    const [filesToAdd] = await local.downloadTree(
+    const [filesToAdd, filesToSkip] = await local.downloadTree(
       tree,
       neatConfig.ignore,
       true
@@ -380,12 +380,14 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     // Get chunks that will be injected
     let chunksToAdd: Array<ChunkLogType> = [];
     let chunksUnknown: Array<ChunkLogType> = [];
+    let chunksToSkip: Array<ChunkLogType> = [];
     if (neatConfig.hasChunks()) {
       const injections = await local
         .injectChunks(neatConfig.chunks, true, filesToAdd)
         .catch(this.error);
       chunksToAdd = injections.addedChunks;
       chunksUnknown = injections.unknownChunks;
+      chunksToSkip = injections.skippedChunks;
     }
 
     // If nothing to do, skip any user input
@@ -435,33 +437,56 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
       }
 
       // Preview files to add
-      this.log(
-        `${chalk.yellow("⚠️")} ${chalk.bold(
-          filesToAdd.length
-        )} file(s) will be added:`
-      );
+      this.log(`${chalk.bold(filesToAdd.length)} file(s) will be added:`);
       if (filesToAdd.length) this.log(chalk.grey(filesToAdd.join("\n")));
 
-      // Preview chunks to add
-      if (neatConfig.hasChunks()) {
+      // Preview files to skip
+      if (filesToSkip.length) {
         this.log(
-          `${chalk.yellow("⚠️")} ${chalk.bold(
-            chunksToAdd.length
-          )} chunk(s) will be injected:`
+          `${chalk.bold(
+            filesToSkip.length
+          )} file(s) will be skipped (use ${chalk.blue(
+            "--force-download"
+          )} to force):`
+        );
+        this.log(chalk.grey(filesToSkip.join("\n")));
+      }
+
+      if (neatConfig.hasChunks()) {
+        // Preview chunks with commands
+        if (chunksUnknown.length) {
+          this.log(
+            chalk.yellow(
+              `⚠️ ${chalk.bold(
+                chunksUnknown.length
+              )} chunk(s) will be known after apply:`
+            )
+          );
+          this.log(
+            chalk.grey(chunksUnknown.map(local.chunkToString).sort().join("\n"))
+          );
+        }
+
+        // Preview chunks to add
+        this.log(
+          `${chalk.bold(chunksToAdd.length)} chunk(s) will be injected:`
         );
         if (chunksToAdd.length)
           this.log(
             chalk.grey(chunksToAdd.map(local.chunkToString).sort().join("\n"))
           );
 
-        if (chunksUnknown.length) {
+        // Preview chunks to skip
+        if (chunksToSkip.length) {
           this.log(
-            `${chalk.yellow("⚠️")} ${chalk.bold(
-              chunksUnknown.length
-            )} chunk(s) will be known after apply:`
+            `${chalk.bold(
+              chunksToSkip.length
+            )} chunk(s) will be skipped (use ${chalk.blue(
+              "--force-inject"
+            )} to force):`
           );
           this.log(
-            chalk.grey(chunksUnknown.map(local.chunkToString).sort().join("\n"))
+            chalk.grey(chunksToSkip.map(local.chunkToString).sort().join("\n"))
           );
         }
       }
