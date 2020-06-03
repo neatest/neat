@@ -649,43 +649,64 @@ If the before/after pattern is not found neither, the injection will be appended
 
 #### Wrap
 
-The default behaviour is to wrap the injected content with the pattern. You can change this by specifying the wrap option.
+The default behaviour is to wrap the injected content with the pattern. You can change this by specifying the strings added `before` and `after` the content to inject.
 
-For example, the following produces the same result as omitting the wrap option (default behaviour)
-
-```yml
-inject:
-  - id: xyz-hello
-    command: echo "hello world"
-    target: README.md
-    wrap: [before, after]
-```
-
-```md
-<!-- xyz-hello -->
-
-hello world
-
-<!-- xyz-hello -->
-```
-
-The following only adds the pattern before
+For example, the following only changes the behaviour of what is added before the injected content
 
 ```yml
 inject:
   - id: xyz-hello
     command: echo "hello world"
     target: README.md
-    wrap: before
+    wrap:
+      before: <!-- before-hello -->
 ```
 
 ```md
+<!-- before-hello -->
+
+hello world
+
 <!-- xyz-hello -->
+```
+
+The following does not add the pattern after the injected content
+
+```yml
+inject:
+  - id: xyz-hello
+    command: echo "hello world"
+    target: README.md
+    wrap:
+      before: <!-- before-hello -->
+      after: false
+```
+
+```md
+<!-- before-hello -->
 
 hello world
 ```
 
-The following adds no pattern before or after
+The following changes the whole wrapping
+
+```yml
+inject:
+  - id: xyz-hello
+    command: echo "hello world"
+    target: README.md
+    wrap: <!-- wrap-hello -->
+```
+
+```md
+<!-- wrap-hello -->
+
+hello world
+
+<!-- wrap-hello -->
+```
+
+The following disables wrapping
 
 ```yml
 inject:

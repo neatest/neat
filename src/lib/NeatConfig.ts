@@ -237,22 +237,21 @@ export class NeatConfig {
     } else chunk.if = ifTypes;
 
     // Wrap
-    const wrapTypes: Array<"before" | "after"> = ["before", "after"];
-
-    if (
-      input.wrap &&
-      typeof input.wrap === "string" &&
-      wrapTypes.includes(input.wrap)
-    )
-      chunk.wrap = [input.wrap];
-    else if (Array.isArray(input.wrap) && input.wrap.length > 0)
-      chunk.wrap = input.wrap.filter((w) => wrapTypes.includes(w));
-    else if (
-      (Array.isArray(input.wrap) && input.wrap.length === 0) ||
-      input.wrap === false
-    )
-      chunk.wrap = [];
-    else chunk.wrap = wrapTypes;
+    chunk.wrap = {
+      before: chunk.pattern + "\n\n",
+      after: "\n\n" + chunk.pattern,
+    };
+    if (input.wrap && typeof input.wrap === "string")
+      chunk.wrap = { before: input.wrap, after: input.wrap };
+    else if (input.wrap === false) chunk.wrap = { before: "", after: "" };
+    else if (typeof input.wrap === "object") {
+      if (input.wrap.before && typeof input.wrap.before === "string")
+        chunk.wrap.before = input.wrap.before;
+      else if (input.wrap.before === false) chunk.wrap.before = "";
+      if (input.wrap.after && typeof input.wrap.after === "string")
+        chunk.wrap.after = input.wrap.after;
+      else if (input.wrap.after === false) chunk.wrap.after = "";
+    }
 
     return chunk;
   }

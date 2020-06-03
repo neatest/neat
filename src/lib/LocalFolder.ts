@@ -296,13 +296,9 @@ export class LocalFolder {
     sourceContent = sourceContent.replace(RegExp(escapedPattern, "ig"), "");
 
     // Add the pattern at the begining and at the end of the content
-    sourceContent = `${
-      chunk.wrap.includes("before") ? chunk.pattern + "\n\n" : ""
-    }${sourceContent
+    sourceContent = `${chunk.wrap.before}${sourceContent
       .replace(/^(\r\n|\n|\r)+/, "")
-      .replace(/(\r\n|\n|\r)+$/, "")}${
-      chunk.wrap.includes("after") ? "\n\n" + chunk.pattern : ""
-    }`;
+      .replace(/(\r\n|\n|\r)+$/, "")}${chunk.wrap.after}`;
 
     let newTargetContent = null;
 

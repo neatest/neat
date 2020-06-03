@@ -6,7 +6,7 @@ export interface ChunkType extends YamlInjectType {
   target: string;
   pattern: string;
   if: Array<"no-file" | "no-pattern" | "single-pattern" | "double-pattern">;
-  wrap: Array<"before" | "after">;
+  wrap: { before: string; after: string };
 }
 
 export interface SymLinkType {
@@ -143,7 +143,7 @@ export interface YamlInjectType {
     | "single-pattern"
     | "double-pattern"
     | Array<"no-file" | "no-pattern" | "single-pattern" | "double-pattern">;
-  wrap?: "before" | "after" | Array<"before" | "after"> | false;
+  wrap?: { before?: string | false; after?: string | false } | string | false;
 }
 
 export function isYamlInjectType(input: unknown): input is YamlInjectType {

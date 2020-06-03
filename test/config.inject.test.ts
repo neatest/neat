@@ -105,6 +105,9 @@ describe("INJECT", () => {
       expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
     });
 
+  /**
+   * Wrap
+   */
   describe("wrap", () => {
     test
       .stub(cli, "anykey", () => async () => Promise.resolve())
@@ -117,17 +120,18 @@ describe("INJECT", () => {
               file: test/test.md
               target: test/test.html
               pattern: "<!-- auto-support -->"
-              wrap: before
+              wrap:
+                before: <!-- before -->
           `
         );
       })
       .stdout()
       .do(() => cmd.run(["test"]))
       .it(
-        "add pattern before the injected content when wrap is before",
+        "add pattern before the injected content when wrap.before is set",
         (ctx) => {
           expect(ctx.stdout).to.contain("1 chunk(s) injected");
-          const htmlContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}`;
+          const htmlContent = `${testContent}\n\n<!-- before -->${testContent}\n\n<!-- auto-support -->`;
           expectFilesContentToMatch("./", ["test/test.txt", "test/test.md"]);
           expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
         }
@@ -144,17 +148,18 @@ describe("INJECT", () => {
               file: test/test.md
               target: test/test.html
               pattern: "<!-- auto-support -->"
-              wrap: [after]
+              wrap:
+                after: <!-- after -->
           `
         );
       })
       .stdout()
       .do(() => cmd.run(["test"]))
       .it(
-        "add pattern after the injected content when wrap is after",
+        "add pattern after the injected content when wrap.after is set",
         (ctx) => {
           expect(ctx.stdout).to.contain("1 chunk(s) injected");
-          const htmlContent = `${testContent}\n\n${testContent}\n\n<!-- auto-support -->`;
+          const htmlContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}<!-- after -->`;
           expectFilesContentToMatch("./", ["test/test.txt", "test/test.md"]);
           expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
         }
@@ -170,17 +175,46 @@ describe("INJECT", () => {
               file: test/test.md
               target: test/test.html
               pattern: "<!-- auto-support -->"
-              wrap: [before, after]
+              wrap:
+                before: <!-- before -->
+                after: <!-- after -->
           `
         );
       })
       .stdout()
       .do(() => cmd.run(["test"]))
       .it(
-        "add pattern before and after the injected content when wrap is before and after",
+        "add pattern before and after the injected content when wrap.before and wrap.after are set",
         (ctx) => {
           expect(ctx.stdout).to.contain("1 chunk(s) injected");
-          const htmlContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}\n\n<!-- auto-support -->`;
+          const htmlContent = `${testContent}\n\n<!-- before -->${testContent}<!-- after -->`;
+          expectFilesContentToMatch("./", ["test/test.txt", "test/test.md"]);
+          expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
+        }
+      );
+
+    test
+      .stub(cli, "anykey", () => async () => Promise.resolve())
+      .nock("https://raw.githubusercontent.com", (nock) => {
+        nock.get("/test/test/master/.neat.yml").reply(
+          200,
+          `
+          inject:
+            - id: support
+              file: test/test.md
+              target: test/test.html
+              pattern: "<!-- auto-support -->"
+              wrap: <!-- my-wrap -->
+          `
+        );
+      })
+      .stdout()
+      .do(() => cmd.run(["test"]))
+      .it(
+        "add pattern before and after the injected content when wrap is set",
+        (ctx) => {
+          expect(ctx.stdout).to.contain("1 chunk(s) injected");
+          const htmlContent = `${testContent}\n\n<!-- my-wrap -->${testContent}<!-- my-wrap -->`;
           expectFilesContentToMatch("./", ["test/test.txt", "test/test.md"]);
           expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
         }
@@ -224,17 +258,46 @@ describe("INJECT", () => {
               file: test/test.md
               target: test/test.html
               pattern: "<!-- auto-support -->"
-              wrap: []
+              wrap:
+                before: false
           `
         );
       })
       .stdout()
       .do(() => cmd.run(["test"]))
       .it(
-        "don't wrap the injected content with any pattern when wrap is empty",
+        "don't add pattern before the injected content when wrap.before is false",
         (ctx) => {
           expect(ctx.stdout).to.contain("1 chunk(s) injected");
-          const htmlContent = `${testContent}\n\n${testContent}`;
+          const htmlContent = `${testContent}\n\n${testContent}\n\n<!-- auto-support -->`;
+          expectFilesContentToMatch("./", ["test/test.txt", "test/test.md"]);
+          expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
+        }
+      );
+
+    test
+      .stub(cli, "anykey", () => async () => Promise.resolve())
+      .nock("https://raw.githubusercontent.com", (nock) => {
+        nock.get("/test/test/master/.neat.yml").reply(
+          200,
+          `
+          inject:
+            - id: support
+              file: test/test.md
+              target: test/test.html
+              pattern: "<!-- auto-support -->"
+              wrap:
+                after: false
+          `
+        );
+      })
+      .stdout()
+      .do(() => cmd.run(["test"]))
+      .it(
+        "don't add pattern after the injected content when wrap.after is false",
+        (ctx) => {
+          expect(ctx.stdout).to.contain("1 chunk(s) injected");
+          const htmlContent = `${testContent}\n\n<!-- auto-support -->\n\n${testContent}`;
           expectFilesContentToMatch("./", ["test/test.txt", "test/test.md"]);
           expectFilesContentToMatch("./", ["test/test.html"], htmlContent);
         }

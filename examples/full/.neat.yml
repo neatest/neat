@@ -36,7 +36,8 @@ inject:
   - id: hello
     command: echo "hello world"
     target: [hello.txt, hello.md]
-    wrap: before
+    wrap:
+      before: <!-- begin-hello -->
   - id: google
     if: no-file
     url: https://google.com
