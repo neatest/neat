@@ -46,6 +46,16 @@ export interface QuestionChoiceType {
   checked: boolean;
 }
 
+export function isQuestionChoiceType(
+  input: unknown
+): input is QuestionChoiceType {
+  const obj = input as QuestionChoiceType;
+  if (typeof obj.name === "string" && typeof obj.checked === "boolean") {
+    return true;
+  }
+  return false;
+}
+
 /**
  * YAML types
  */

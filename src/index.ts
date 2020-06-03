@@ -2,13 +2,15 @@ import { Command, flags } from "@oclif/command";
 import chalk from "chalk";
 import { exec } from "child_process";
 import cli from "cli-ux";
-import { existsSync, mkdirSync } from "fs-extra";
+import { existsSync, mkdirSync, readFileSync } from "fs-extra";
 import inquirer from "inquirer";
 import { ChunkLogType, LocalFolder } from "./lib/LocalFolder";
 import { NeatConfig } from "./lib/NeatConfig";
 import {
+  isQuestionChoiceType,
   isScriptCommandType,
   isString,
+  QuestionChoiceType,
   ScriptCommandType,
 } from "./lib/NeatConfigTypes";
 import { RemoteRepo, TreeType } from "./lib/RemoteRepo";
@@ -72,6 +74,7 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     if (flags.debug === true) process.env["NEAT_DEBUG"] = "true";
 
     if (!args.repository) return this._help();
+    else if (args.repository === "inspect") return this.inspect(args.folder);
 
     if (args.folder) {
       if (!existsSync(args.folder)) mkdirSync(args.folder);
@@ -224,6 +227,137 @@ Also supports tags and branches such as neat-repo@v1 or owner/repo@master`,
     }
 
     this.log(chalk.green("\n\nYour repo is ready!"));
+  }
+
+  async inspect(repo: string | undefined) {
+    let repository: string;
+    let config: NeatConfig;
+
+    if (repo === undefined) this.error("You need to specify a repo to inspect");
+    // If inspecting a local config file
+    else if (/^\./i.test(repo)) {
+      const path = repo.replace(/\/$/, "") + "/";
+      if (!existsSync(`${path}/.neat.yml`))
+        this.error(`Cannot find a config file at ${path}.neat.yml`);
+      else {
+        // Show initialization message
+        this.log(chalk.cyan(`Inspecting ${path}.neat.yml`));
+
+        // Get config
+        config = new NeatConfig(
+          readFileSync(`${path}.neat.yml`, "utf-8"),
+          path
+        );
+      }
+    }
+    // If inspecting a remote repo
+    else {
+      repository = repo.includes("/")
+        ? repo
+        : await RemoteRepo.getNeatRepoPath(repo).catch(this.error);
+
+      // Show initialization message
+      this.log(chalk.cyan(`Inspecting https://github.com/${repository}`));
+
+      // Initialize remote repository
+      const remote = new RemoteRepo(repository);
+
+      // Get config
+      config = await remote.getConfig();
+    }
+
+    if (config.preRun || config.preDownload || config.postRun) {
+      const stages: { [k: string]: Array<string | ScriptCommandType> } = {
+        "pre-run": config.preRun,
+        "pre-download": config.preDownload,
+        "post-run": config.postRun,
+      };
+      Object.keys(stages).forEach((key) => {
+        if (stages[key].length) {
+          this.log(chalk.inverse(`\n${key}\n`));
+          stages[key].map((v) =>
+            isScriptCommandType(v)
+              ? this.log(
+                  `  - script: ${chalk.yellow(
+                    /\n/.test(v.toString())
+                      ? v.toString().replace(/^|\n/g, `\n    `)
+                      : v.toString()
+                  )}`
+                )
+              : this.log(`  - ${chalk.red(v.replace(/\n/g, "\n    "))}`)
+          );
+        }
+      });
+    }
+    if (config.symLink.length) {
+      this.log(`\n${chalk.inverse("symlink")}`);
+      config.symLink.forEach((s) =>
+        this.log(
+          `\n  - ${chalk.green(s.target)}: ${chalk.greenBright(s.source)}`
+        )
+      );
+    }
+    if (config.ignore.length)
+      this.log(
+        `\n${chalk.inverse("ignore")} [${chalk.green(
+          config.ignore.join(", ")
+        )}]`
+      );
+    if (config.questions.length) {
+      this.log(`\n${chalk.inverse("ask")}`);
+      config.questions.forEach((q) => {
+        this.log(`\n  - id: ${chalk.green(q.name)}`);
+        this.log(`    description: ${chalk.green(q.message)}`);
+        if (config.toReplace.includes(q.name))
+          this.log(`    replace: ${chalk.green("true")}`);
+        if (q.default) this.log(`    default: ${chalk.green(q.default)}`);
+        else if (q.choices) {
+          const choices: Array<string | QuestionChoiceType> = q.choices();
+          if (choices.length > 0 && typeof choices[0] === "string")
+            this.log(`    default: [${chalk.green(choices.join(", "))}]`);
+          else if (choices.length > 0) {
+            this.log(`    default:`);
+            choices
+              .filter(isQuestionChoiceType)
+              .forEach((choice) =>
+                this.log(
+                  `      - ${chalk.green(choice.name)}: ${chalk.greenBright(
+                    choice.checked
+                  )}`
+                )
+              );
+          }
+        }
+      });
+    }
+    if (config.chunks.length) {
+      this.log(`\n${chalk.inverse("inject")}`);
+      config.chunks.forEach((chunk) => {
+        this.log(`\n  - id: ${chalk.green(chunk.id)}`);
+        this.log(`    if: [${chalk.green(chunk.if.join(", "))}]`);
+        if (chunk.command) this.log(`    command: ${chalk.red(chunk.command)}`);
+
+        const stringprops: Array<
+          "target" | "pattern" | "file" | "url" | "before" | "after"
+        > = ["target", "pattern", "file", "url", "before", "after"];
+
+        stringprops.forEach((v) => {
+          if (chunk[v]) this.log(`    ${v}: ${chalk.green(chunk[v])}`);
+        });
+      });
+    }
+    if (config.replacePattern)
+      this.log(
+        `\n${chalk.inverse("replace_pattern")} ${chalk.green(
+          config.replacePattern
+        )}`
+      );
+    if (config.replaceFilter)
+      this.log(
+        `\n${chalk.inverse("replace_filter")} ${chalk.green(
+          config.replaceFilter
+        )}`
+      );
   }
 
   async dryRun(tree: TreeType[], neatConfig: NeatConfig, local: LocalFolder) {

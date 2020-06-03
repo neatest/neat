@@ -224,7 +224,7 @@ export class NeatConfig {
       (input.if && typeof input.if === "string") ||
       (Array.isArray(input.if) && input.if.length > 0)
     )
-      chunk.if = input.if;
+      chunk.if = Array.isArray(input.if) ? input.if : [input.if];
     else if (
       (input.ifnot && typeof input.ifnot === "string") ||
       (Array.isArray(input.ifnot) && input.ifnot.length > 0)

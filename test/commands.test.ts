@@ -272,6 +272,47 @@ describe("COMMANDS", () => {
       });
   });
 
+  describe("neat inspect", () => {
+    test
+      .stdout()
+      .do(() => cmd.run(["inspect", "./examples/full"]))
+      .it("inspects a local configuration correctly", (ctx) => {
+        expect(ctx.stdout).to.contain("pre-run");
+        expect(ctx.stdout).to.contain("pre-download");
+        expect(ctx.stdout).to.contain("post-run");
+        expect(ctx.stdout).to.contain("symlink");
+        expect(ctx.stdout).to.contain("ignore");
+        expect(ctx.stdout).to.contain("ask");
+        expect(ctx.stdout).to.contain("inject");
+        expect(ctx.stdout).to.contain("replace_pattern");
+        expect(ctx.stdout).to.contain("replace_filter");
+      });
+
+    test
+      .stdout()
+      .do(() => cmd.run(["inspect", "test"]))
+      .it("inspects a registered repo configuration correctly", (ctx) => {
+        expect(ctx.stdout).to.contain("replace_pattern");
+        expect(ctx.stdout).to.contain("replace_filter");
+      });
+
+    test
+      .stdout()
+      .do(() => cmd.run(["inspect", "test/test"]))
+      .it("inspects a remote repo configuration correctly", (ctx) => {
+        expect(ctx.stdout).to.contain("replace_pattern");
+        expect(ctx.stdout).to.contain("replace_filter");
+      });
+
+    test
+      .stdout()
+      .do(() => cmd.run(["inspect", "./test"]))
+      .catch((ctx) => {
+        expect(ctx.message).to.contain("Cannot find a config file");
+      })
+      .it("fails when a neat config file doesn't exist");
+  });
+
   afterEach(() => {
     ["test/test.txt", "test/test.md", "test/test.html", "test/testing"].map(
       (file) => {

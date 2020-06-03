@@ -71,7 +71,7 @@ Neat is very powerful, as it allows you to enhance existing repos or create new 
 
 The default behaviour is to just download files, but Neat repos can specify a `.neat.yml` which can virtually do anything when a user "neats" a repo.
 
-Neat is safe to run in an existing directory because it will **never change existing files** unless you use the [force flags](#--force-download). That said, always inspect the `.neat.yml` configuration file before neating a repo because it could run commands that could be harmful to your system.
+Neat is safe to run in an existing directory because it will **never change existing files** unless you use the [force flags](#--force-download). That said, always [inspect the configuration file](#inspect-a-repo-configuration) before neating a repo to spot anything that could be harmful to your system or your files (potential threats will be highlighted).
 
 There is a collection of neat repos in [neat-repos.json](neat-repos.json) (See [contributing](#contributing) if you want to submit yours).
 Although we look at the repo at the time of adding it to the list, we cannot vouch for any changes committed after that.
@@ -120,6 +120,14 @@ neat repo my-project
 ```
 
 > This is usually used for creating a new repo using a neat template
+
+### Inspect a repo configuration
+
+You can easily inspect a configuration file before neating repo by running:
+
+```sh
+neat inspect repo
+```
 
 ### Options
 
@@ -252,20 +260,43 @@ This is non invasive: it will not overwrite your files except for `docs/SECURITY
 
 ## 🤘 Creating a neat repo
 
-Each Neat repo can contain a `.neat.yml` configuration file which specifies what to do when someone "neats" your repo. **Please keep [composability](#a-word-on-composability) in mind when making a neat template**.
+Each Neat repo can contain a `.neat.yml` configuration file which specifies what to do when someone "neats" the repo.
 
-You can find configuration examples in the [examples](examples) folder
+There is a [neat template](https://github.com/olivr-templates/neat-neat) to help you make a neat template.
 
-We also have a [neat template](https://github.com/olivr-templates/neat-neat) to help you make your repo a neat template.
+### Tips and advice
 
-> [--debug](#-d---debug) is very useful when a Neat configuration file doesn't work as expected!
+#### Examples
 
-### A word on composability
+- You can find configuration examples in the [examples](examples) folder
+- For more real-world examples, you can look at the configuration files of the [neat-repos.json](neat-repos.json)
+
+#### Debugging
+
+You can easily inspect a local configuration file by providing a local directory instead of a repo:
+
+```sh
+neat inspect ./localrepo
+```
+
+The path must start with "." to be recognized as a local path.
+
+When your Neat repo doesn't work as expected, you can use the [--debug](#-d---debug) command if `inspect` is not of enough help.
+
+Note that `inspect` is meant to help final users to inspect a repo. Commands are always highlighted in red and scripts in yellow, so the colors DO NOT indicate errors in your configuration.
+
+If there is an error in your configuration:
+
+- You will see an error if the YAML file is malformed
+- If the YAML is wellformed, but Neat cannot understand some configuration, it will ignore it and this configuration will not appear when inspecting.
+
+#### Composability
 
 In order to improve composability between neat templates, respect these guidelines:
 
 - Make use of injections and before/after hooks.
-- Choose you injection IDs/patterns wisely so that you don't overwrite another template's content. For example, if two templates both use the ID 'description', the only description remaining will be the last one that was run. A good practice is to precede all your IDs with your template name.
+- Choose your injection IDs/patterns wisely so that you don't overwrite another template's content. For example, if two templates both use the ID 'description', the only description remaining will be the last one that was run. A good practice is to precede all your IDs with your template name.
+- If your repo is composing well with another repo, say it in your Readme.
 
 ### Pre-run
 
