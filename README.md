@@ -861,6 +861,7 @@ If you are running other programs or system-specific commands in your Neat confi
 
 [![Build](https://github.com/olivr-com/neat/workflows/Build%20&%20Publish%20CLI/badge.svg)](https://github.com/olivr-com/neat/actions?query=workflow%3A%22Build+%26+Publish+CLI%22)
 [![Codecov](https://codecov.io/gh/olivr-com/neat/branch/master/graph/badge.svg)](https://codecov.io/gh/olivr-com/neat)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Folivr-com%2Fneat.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Folivr-com%2Fneat?ref=badge_shield)
 
 ### Add your repo to the registered repo list
 
@@ -970,6 +971,9 @@ This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENS
 <!-- auto-license -->
 
 <!-- auto-about-org -->
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Folivr-com%2Fneat.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Folivr-com%2Fneat?ref=badge_large)
 
 ## ⭕ About Olivr
 
