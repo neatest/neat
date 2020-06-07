@@ -2,12 +2,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { expect, test } from "@oclif/test";
 import { cli } from "cli-ux";
-import {
-  ensureFileSync,
-  existsSync,
-  removeSync,
-  writeFileSync,
-} from "fs-extra";
+import { ensureFileSync, existsSync, removeSync, writeFileSync } from "fs-extra";
 import nock from "nock";
 import { expectFilesContentToMatch, testContent } from "./testHelpers";
 
@@ -315,7 +310,7 @@ describe("INJECT", () => {
           200,
           `inject:
             - id: hello
-              command: echo "hello world"
+              command: echo hello world
               target: test/testing/notfound.html
           `
         );
@@ -344,7 +339,7 @@ describe("INJECT", () => {
             200,
             `inject:
             - id: hello
-              command: echo "hello world"
+              command: echo hello world
               target: test/testing/notfound.html
               before: "## Options"
           `
@@ -373,7 +368,7 @@ describe("INJECT", () => {
             200,
             `inject:
             - id: hello
-              command: echo "hello world"
+              command: echo hello world
               target: test/testing/notfound.html
               after: "## Options"
           `
@@ -405,7 +400,7 @@ describe("INJECT", () => {
             `inject:
             - id: hello
               if: [no-file]
-              command: echo "hello world"
+              command: echo hello world
               target: test/testing/notfound.html
           `
           );
@@ -434,7 +429,7 @@ describe("INJECT", () => {
             `inject:
             - id: hello
               if: [no-pattern, single-pattern, double-pattern]
-              command: echo "hello world"
+              command: echo hello world
               target: test/testing/notfound.html
               pattern: "<!-- other -->"`
           );
@@ -458,7 +453,7 @@ describe("INJECT", () => {
             `inject:
             - id: hello
               ifnot: [no-file, double-pattern]
-              command: echo "hello world"
+              command: echo hello world
               target: test/testing/notfound.html
               pattern: "<!-- other -->"`
           );
@@ -517,7 +512,7 @@ describe("INJECT", () => {
             200,
             `inject:
             - id: hello
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- other -->"`
           );
@@ -544,7 +539,7 @@ describe("INJECT", () => {
             200,
             `inject:
             - id: hello
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- other -->"`
           );
@@ -570,7 +565,7 @@ describe("INJECT", () => {
             200,
             `inject:
             - id: hello
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               before: "## Options"
           `
@@ -598,7 +593,7 @@ describe("INJECT", () => {
             200,
             `inject:
             - id: hello
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               after: "## Options"
           `
@@ -626,7 +621,7 @@ describe("INJECT", () => {
             200,
             `inject:
             - id: hello
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               before: "I do not exist"
           `
@@ -659,7 +654,7 @@ describe("INJECT", () => {
             `inject:
             - id: hello
               if: [no-pattern]
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- other -->"`
           );
@@ -687,7 +682,7 @@ describe("INJECT", () => {
             `inject:
             - id: hello
               if: [no-file, single-pattern, double-pattern]
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- other -->"`
           );
@@ -710,7 +705,7 @@ describe("INJECT", () => {
             `inject:
             - id: hello
               ifnot: [no-pattern]
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- other -->"`
           );
@@ -738,7 +733,7 @@ describe("INJECT", () => {
           200,
           `inject:
             - id: hello
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- project_name -->"`
         );
@@ -766,7 +761,7 @@ describe("INJECT", () => {
             200,
             `inject:
             - id: hello
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- project_name -->"`
           );
@@ -796,7 +791,7 @@ describe("INJECT", () => {
             200,
             `inject:
             - id: hello
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- project_name -->"`
           );
@@ -832,7 +827,7 @@ describe("INJECT", () => {
             `inject:
             - id: hello
               if: [single-pattern]
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- project_name -->"`
           );
@@ -861,7 +856,7 @@ describe("INJECT", () => {
             `inject:
             - id: hello
               if: [no-file, no-pattern, double-pattern]
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- project_name -->"`
           );
@@ -884,7 +879,7 @@ describe("INJECT", () => {
             `inject:
             - id: hello
               ifnot: [no-file, single-pattern, double-pattern]
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- project_name -->"`
           );
@@ -946,7 +941,7 @@ describe("INJECT", () => {
             200,
             `inject:
             - id: hello
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- project_name -->"`
           );
@@ -1009,7 +1004,7 @@ describe("INJECT", () => {
             200,
             `inject:
             - id: hello
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- project_name -->"`
           );
@@ -1048,7 +1043,7 @@ describe("INJECT", () => {
             `inject:
             - id: hello
               if: [single-pattern, double-pattern]
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- project_name -->"`
           );
@@ -1079,7 +1074,7 @@ describe("INJECT", () => {
             `inject:
             - id: hello
               if: [no-file, no-pattern, single-pattern]
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- project_name -->"`
           );
@@ -1111,7 +1106,7 @@ describe("INJECT", () => {
             `inject:
             - id: hello
               ifnot: double-pattern
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- project_name -->"`
           );
@@ -1143,7 +1138,7 @@ describe("INJECT", () => {
             `inject:
             - id: hello
               if: [single-pattern, double-pattern]
-              command: echo "hello world"
+              command: echo hello world
               target: test/test.html
               pattern: "<!-- project_name -->"`
           );
