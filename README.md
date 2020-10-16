@@ -2,6 +2,7 @@
 
 Neat is a CLI tool and a collection of the neatest repository templates to boost your repos.
 
+<!-- prettier-ignore-start -->
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
@@ -37,6 +38,7 @@ Neat is a CLI tool and a collection of the neatest repository templates to boost
 - [⭕ About Olivr](#-about-olivr)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+<!-- prettier-ignore-end -->
 
 ## 💾 Installation
 
@@ -971,7 +973,6 @@ This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENS
 <!-- auto-license -->
 
 <!-- auto-about-org -->
-
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Folivr-com%2Fneat.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Folivr-com%2Fneat?ref=badge_large)
 

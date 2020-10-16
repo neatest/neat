@@ -1,0 +1,31 @@
+add neat/inject action to neat-cli for usage
+
+/*
+https://docs.npmjs.com/misc/config#production
+https://docs.npmjs.com/misc/config#progress
+https://docs.npmjs.com/misc/config#scope
+https://docs.npmjs.com/misc/config#sign-git-commit
+https://docs.npmjs.com/misc/config#sign-git-tag
+*/
+
+
+https://jestjs.io/docs/en/configuration#runner-string
+
+
+add if to pre/post run commands with predefined variables
+addedFiles: Array // Remove ./ from added files even in console output
+os: string https://nodejs.org/api/process.html#process_process_platform
+check https://github.com/kentcdodds/cross-env
+
+REDO neat-cli on top of neat-npm (just add example file + yarn add...)
+
+check https://github.com/semantic-release/semantic-release
+
+https://github.com/conventional-changelog/commitlint
+https://commitlint.js.org/#/guides-local-setup
+https://www.npmjs.com/package/husky
+
+cross-env
+
+
+https://github.com/marionebl/svg-term-cli
